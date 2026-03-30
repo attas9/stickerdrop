@@ -526,9 +526,20 @@
     }
     .action-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.14); }
 
-    .btn-download { background: var(--accent3); color: white; border-color: var(--accent3); }
-    .btn-again    { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
-    .btn-reset    { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
+    .btn-download  { background: var(--accent3); color: white; border-color: var(--accent3); }
+    .btn-again     { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+    .btn-reset     { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
+    .btn-snapchat  {
+      background: #FFFC00;
+      color: #000;
+      border-color: #FFFC00;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-snapchat svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .btn-snapchat:hover { box-shadow: 0 4px 16px rgba(255,252,0,0.5); }
 
     /* ── Settings cog ── */
     .settings-btn {
@@ -708,6 +719,10 @@
     </div>
 
     <div class="action-btns" id="actionBtns">
+      <button class="action-btn btn-snapchat" onclick="shareToSnapchat()">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.001 2C8.557 2 6.25 4.388 6.25 7.5v.73c0 .3-.044.594-.13.876l-.528 1.738c-.07.23-.28.39-.52.39-.02 0-.04 0-.06-.003-.23-.03-.462-.044-.696-.044-.522 0-.855.09-.997.268-.115.145-.115.34 0 .485.395.503 1.33.87 2.78 1.094.083.013.157.057.207.124l.554.75c.1.136.092.323-.02.45-.39.44-.6 1.01-.54 1.6.11 1.06.96 1.91 2.02 2.02.24.025.48.037.72.037.5 0 .99-.09 1.46-.267.31-.116.65-.116.96 0 .47.177.96.267 1.46.267.24 0 .48-.012.72-.037 1.06-.11 1.91-.96 2.02-2.02.06-.59-.15-1.16-.54-1.6-.112-.127-.12-.314-.02-.45l.554-.75c.05-.067.124-.111.207-.124 1.45-.224 2.385-.591 2.78-1.094.115-.145.115-.34 0-.485-.142-.178-.475-.268-.997-.268-.234 0-.466.014-.696.044-.02.003-.04.003-.06.003-.24 0-.45-.16-.52-.39l-.528-1.738a2.762 2.762 0 01-.13-.876V7.5C17.752 4.388 15.445 2 12.001 2z" fill="#000"/></svg>
+        <span id="btnSnapchat">Add to Snapchat</span>
+      </button>
       <button class="action-btn btn-download" id="btnDownload" onclick="downloadSticker()">⬇ Download</button>
       <button class="action-btn btn-again"    id="btnAgain"    onclick="tryAgain()">🔄 Try Again</button>
       <button class="action-btn btn-reset"    id="btnReset"    onclick="startOver()">🔁 Start Over</button>
@@ -781,6 +796,7 @@
       loading:      'Crafting your sticker…',
       ready:        'Your sticker is ready! 🎉',
       oops:         'Oops! Something went wrong 😅',
+      snapchat:     'Add to Snapchat',
       download:     '⬇ Download',
       again:        '🔄 Try Again',
       reset:        '🔁 Start Over',
@@ -800,6 +816,7 @@
       loading:      '…يتم تصميم ستيكرك',
       ready:        '🎉 ستيكرك جاهز',
       oops:         '😅 !حدث خطأ ما',
+      snapchat:     'أضف لسناب شات',
       download:     '⬇ تحميل',
       again:        '🔄 مرة ثانية',
       reset:        '🔁 من البداية',
@@ -897,6 +914,7 @@
     document.getElementById('optionalTag3').textContent = c.optional;
     document.getElementById('btnLabel').textContent     = c.btnLabel;
     document.getElementById('loadingText').textContent  = c.loading;
+    document.getElementById('btnSnapchat').textContent  = c.snapchat;
     document.getElementById('btnDownload').textContent  = c.download;
     document.getElementById('btnAgain').textContent     = c.again;
     document.getElementById('btnReset').textContent     = c.reset;
@@ -1153,6 +1171,32 @@
   }
 
   /* ─────────────── Actions ─────────────── */
+  async function shareToSnapchat() {
+    const img = document.getElementById('stickerImg');
+    try {
+      // Convert data URL to blob
+      const res   = await fetch(img.src);
+      const blob  = await res.blob();
+      const file  = new File([blob], 'stickerdrop.png', { type: 'image/png' });
+
+      // Try native share sheet (works on mobile — user picks Snapchat)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'My StickerDrop sticker' });
+        return;
+      }
+
+      // Fallback: open Snapchat Creative Kit web intent
+      const dataUrl   = img.src;
+      const stickerUrl = encodeURIComponent(dataUrl);
+      window.open(`https://www.snapchat.com/scan?attachmentUrl=${stickerUrl}`, '_blank');
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        // User dismissed share sheet — ignore
+        alert('Open Snapchat → Memories → paste the downloaded image as a sticker.');
+      }
+    }
+  }
+
   function downloadSticker() {
     const img = document.getElementById('stickerImg');
     const a = document.createElement('a');
