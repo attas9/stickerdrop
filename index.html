@@ -703,50 +703,61 @@
            `high quality, crisp clean details, sticker sheet ready.`;
   }
 
-  /* ── AI Image Generation Service (Pollinations) ── */
+  /* ── AI Image Generation Service (Gemini 2.0 Flash Experimental) ── */
+
+  const STICKER_SUFFIX = 'sticker, white background, bold outline, centered, high contrast';
 
   /**
    * generateImage(prompt, style?)
-   * Returns a direct image URL — no polling, no base64, no queue.
-   * Appends sticker-optimised suffix and optional style keyword.
+   * Calls Gemini 2.0 Flash experimental image generation.
+   * Returns a base64 data URL — works cross-origin, no CORS issues.
    */
-  function generateImage(prompt, style) {
-    const STICKER_SUFFIX = 'sticker, white background, bold outline, centered, high contrast';
+  async function generateImage(prompt, style) {
     const full = style
       ? `${prompt}, ${style}, ${STICKER_SUFFIX}`
       : `${prompt}, ${STICKER_SUFFIX}`;
-    return `https://image.pollinations.ai/prompt/${encodeURIComponent(full)}?width=512&height=512&nologo=true&seed=${Date.now()}`;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${state.apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: full }] }],
+          generationConfig: { responseModalities: ['IMAGE'] }
+        })
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `Gemini image error (${res.status})`);
+    }
+
+    const data = await res.json();
+    const part = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+    if (!part) throw new Error('Gemini returned no image — try again.');
+
+    const { mimeType, data: b64 } = part.inlineData;
+    return `data:${mimeType};base64,${b64}`;
   }
 
   /**
    * renderSticker(prompt)
-   * Loads the Pollinations URL into the <img> element.
-   * Supports both uploaded files and AI-generated URLs via the same img handler.
+   * Fetches image from Gemini then renders it.
+   * Supports both uploaded files and AI-generated data URLs via the same img handler.
    */
-  function renderSticker(prompt) {
-    const url = generateImage(prompt, state.style);
-    return loadImageURL(url);
+  async function renderSticker(prompt) {
+    const dataUrl = await generateImage(prompt, state.style);
+    return loadImageURL(dataUrl);
   }
 
   function loadImageURL(url) {
     return new Promise((resolve, reject) => {
-      const img   = document.getElementById('stickerImg');
-      const timer = setTimeout(() => {
-        img.onload = img.onerror = null;
-        reject(new Error('Image timed out — please try again.'));
-      }, 60000);
-
-      img.onload = () => {
-        clearTimeout(timer);
-        setUIState('result');
-        resolve();
-      };
-      img.onerror = () => {
-        clearTimeout(timer);
-        reject(new Error('Could not load image — please try again.'));
-      };
-
-      img.src = '';   // force reset
+      const img = document.getElementById('stickerImg');
+      img.onload = () => { setUIState('result'); resolve(); };
+      img.onerror = () => reject(new Error('Could not render image — try again.'));
+      img.src = '';
       img.src = url;
     });
   }
@@ -788,8 +799,11 @@
 
   /* ─────────────── Actions ─────────────── */
   function downloadSticker() {
-    // Pollinations blocks cross-origin fetch; open in new tab for save-as
-    window.open(document.getElementById('stickerImg').src, '_blank');
+    const img = document.getElementById('stickerImg');
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = `stickerdrop-${state.mood}-${state.style}-${Date.now()}.png`.toLowerCase().replace(/\s+/g, '-');
+    a.click();
   }
 
   function tryAgain() { generate(); }
