@@ -619,7 +619,7 @@
 
     try {
       const prompt = await buildPromptWithGemini();
-      await renderStickerFromPollinations(prompt);
+      await renderSticker(prompt);
     } catch (err) {
       console.error(err);
       setUIState('error', err.message || 'Something went wrong — please try again.');
@@ -703,47 +703,52 @@
            `high quality, crisp clean details, sticker sheet ready.`;
   }
 
-  async function renderStickerFromPollinations(prompt) {
-    // Submit generation job to Stable Horde (free, anonymous key)
-    const submitRes = await fetch('https://stablehorde.net/api/v2/generate/async', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': '0000000000' },
-      body: JSON.stringify({
-        prompt,
-        params: { width: 512, height: 512, steps: 25, n: 1, karras: true },
-        nsfw: false,
-        censor_nsfw: true,
-        models: ['Deliberate']
-      })
+  /* ── AI Image Generation Service (Pollinations) ── */
+
+  /**
+   * generateImage(prompt, style?)
+   * Returns a direct image URL — no polling, no base64, no queue.
+   * Appends sticker-optimised suffix and optional style keyword.
+   */
+  function generateImage(prompt, style) {
+    const STICKER_SUFFIX = 'sticker, white background, bold outline, centered, high contrast';
+    const full = style
+      ? `${prompt}, ${style}, ${STICKER_SUFFIX}`
+      : `${prompt}, ${STICKER_SUFFIX}`;
+    return `https://image.pollinations.ai/prompt/${encodeURIComponent(full)}?width=512&height=512&nologo=true&seed=${Date.now()}`;
+  }
+
+  /**
+   * renderSticker(prompt)
+   * Loads the Pollinations URL into the <img> element.
+   * Supports both uploaded files and AI-generated URLs via the same img handler.
+   */
+  function renderSticker(prompt) {
+    const url = generateImage(prompt, state.style);
+    return loadImageURL(url);
+  }
+
+  function loadImageURL(url) {
+    return new Promise((resolve, reject) => {
+      const img   = document.getElementById('stickerImg');
+      const timer = setTimeout(() => {
+        img.onload = img.onerror = null;
+        reject(new Error('Image timed out — please try again.'));
+      }, 60000);
+
+      img.onload = () => {
+        clearTimeout(timer);
+        setUIState('result');
+        resolve();
+      };
+      img.onerror = () => {
+        clearTimeout(timer);
+        reject(new Error('Could not load image — please try again.'));
+      };
+
+      img.src = '';   // force reset
+      img.src = url;
     });
-    if (!submitRes.ok) throw new Error(`Image service error (${submitRes.status}) — try again.`);
-    const { id } = await submitRes.json();
-    if (!id) throw new Error('No job ID returned — try again.');
-
-    // Poll until done (up to 3 minutes)
-    const deadline = Date.now() + 180000;
-    while (Date.now() < deadline) {
-      await new Promise(r => setTimeout(r, 4000));
-      const statusRes = await fetch(`https://stablehorde.net/api/v2/generate/check/${id}`);
-      const status    = await statusRes.json();
-      if (status.faulted) throw new Error('Image generation failed — try again.');
-      if (!status.done)   continue;
-
-      // Fetch full result
-      const resultRes = await fetch(`https://stablehorde.net/api/v2/generate/status/${id}`);
-      const result    = await resultRes.json();
-      const imgData   = result?.generations?.[0]?.img;
-      if (!imgData) throw new Error('No image returned — try again.');
-
-      // Stable Horde returns either a URL or a base64 string
-      const imgSrc = imgData.startsWith('http') ? imgData : `data:image/webp;base64,${imgData}`;
-      const img = document.getElementById('stickerImg');
-      img.src = imgSrc;
-      img.dataset.blobUrl = imgSrc;
-      setUIState('result');
-      return;
-    }
-    throw new Error('Image timed out — the service is busy, try again.');
   }
 
   /* ─────────────── UI State Machine ─────────────── */
@@ -782,22 +787,9 @@
   }
 
   /* ─────────────── Actions ─────────────── */
-  async function downloadSticker() {
-    const img = document.getElementById('stickerImg');
-    const url = img.src;
-    const filename = `stickerdrop-${state.mood}-${state.style}-${Date.now()}.png`
-      .toLowerCase().replace(/\s+/g, '-');
-    try {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    } catch {
-      window.open(url, '_blank');
-    }
+  function downloadSticker() {
+    // Pollinations blocks cross-origin fetch; open in new tab for save-as
+    window.open(document.getElementById('stickerImg').src, '_blank');
   }
 
   function tryAgain() { generate(); }
