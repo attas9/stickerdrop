@@ -283,6 +283,34 @@
       line-height: 1.3;
     }
 
+    /* ── Icon suggestions ── */
+    .icon-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-bottom: 0.1rem;
+    }
+    .icon-chip {
+      padding: 0.38rem 0.8rem;
+      border-radius: 100px;
+      border: 2px solid #E5E7EB;
+      background: white;
+      font-size: 0.82rem;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: all 0.14s;
+      color: var(--text);
+    }
+    .icon-chip:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+    .icon-chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(124,58,237,0.3);
+    }
+
     /* ── Upload reference sticker ── */
     .upload-zone {
       border: 2.5px dashed #D1D5DB;
@@ -632,13 +660,26 @@
     </div>
   </div>
 
-  <!-- Step 4: Upload reference (revealed after vibe) -->
+  <!-- Step 4: Add icon/shape (revealed after vibe) -->
   <div class="step-reveal" id="step4Reveal">
-    <div class="step-block" id="step4Block">
+    <div class="step-block">
       <div class="step-header">
         <span class="step-num">4</span>
-        <span class="step-title" id="label4">Upload a reference sticker</span>
+        <span class="step-title" id="label4">Add a shape or icon</span>
         <span class="optional-tag" id="optionalTag2">(optional)</span>
+      </div>
+      <div class="icon-suggestions" id="iconSuggestions"></div>
+      <input type="text" class="word-input" id="iconInput" placeholder="e.g. noodles, crown, fire…" maxlength="40" style="margin-top:0.75rem;width:100%;border-radius:12px;">
+    </div>
+  </div>
+
+  <!-- Step 5: Upload reference (revealed after vibe) -->
+  <div class="step-reveal" id="step5Reveal">
+    <div class="step-block" id="step5Block">
+      <div class="step-header">
+        <span class="step-num">5</span>
+        <span class="step-title" id="label5">Upload a reference sticker</span>
+        <span class="optional-tag" id="optionalTag3">(optional)</span>
       </div>
 
       <!-- Drop zone -->
@@ -762,7 +803,8 @@
       label1:       'Choose your language',
       label2:       'Pick your vibe',
       label3:       'Add your message',
-      label4:       'Upload a reference sticker',
+      label4:       'Add a shape or icon',
+      label5:       'Upload a reference sticker',
       optional:     '(optional)',
       btnLabel:     'Generate Sticker',
       loading:      'Crafting your sticker…',
@@ -780,7 +822,8 @@
       label1:       'اختر لغتك',
       label2:       'اختر الطابع',
       label3:       'أضف رسالتك',
-      label4:       'ارفع ستيكر مرجعي',
+      label4:       'أضف شكل أو أيقونة',
+      label5:       'ارفع ستيكر مرجعي',
       optional:     '(اختياري)',
       btnLabel:     'اصنع ستيكر',
       loading:      '…يتم تصميم ستيكرك',
@@ -800,9 +843,15 @@
     lang:       null,
     vibe:       null,
     message:    '',
-    refImage:   null,   // { base64, mimeType, filename }
-    uploadMode: null,   // 'similar' | 'enhance'
+    icon:       '',
+    refImage:   null,
+    uploadMode: null,
     apiKey:     localStorage.getItem('gemini_api_key') || '',
+  };
+
+  const ICON_SUGGESTIONS = {
+    EN: ['🍜 Noodles','🔥 Fire','👑 Crown','⚡ Lightning','💀 Skull','🌊 Wave','🌙 Moon','🌸 Flower','🍕 Pizza','💎 Diamond','🎯 Target','🐉 Dragon'],
+    AR: ['🍜 نودلز','🔥 نار','👑 تاج','⚡ برق','💀 جمجمة','🌊 موجة','🌙 قمر','🌸 وردة','🍕 بيتزا','💎 ماس','🎯 هدف','🐉 تنين'],
   };
 
   /* ── Boot ── */
@@ -811,6 +860,12 @@
 
     document.getElementById('msgInput').addEventListener('input', e => {
       state.message = e.target.value;
+    });
+
+    document.getElementById('iconInput').addEventListener('input', e => {
+      state.icon = e.target.value.trim();
+      // Deselect chip if user typed manually
+      document.querySelectorAll('.icon-chip').forEach(c => c.classList.remove('active'));
     });
 
     if (!state.apiKey) document.getElementById('apiSetup').classList.add('visible');
@@ -836,6 +891,25 @@
     });
   }
 
+  /* ── Icon chips ── */
+  function renderIconChips(lang) {
+    const wrap = document.getElementById('iconSuggestions');
+    wrap.innerHTML = '';
+    ICON_SUGGESTIONS[lang].forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'icon-chip';
+      btn.textContent = item;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.icon-chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        const raw = item.replace(/^[\p{Emoji}\s]+/u, '').trim();
+        state.icon = raw;
+        document.getElementById('iconInput').value = raw;
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
   /* ── Language selection ── */
   function selectLang(lang) {
     state.lang = lang;
@@ -857,11 +931,9 @@
     // Reveal step 2
     revealStep('step2Reveal');
 
-    // Re-render vibe cards in chosen language
+    // Re-render vibe cards and icon chips in chosen language
     renderVibeCards();
-
-    // If vibe was already picked (language switch), update overlay font
-    if (state.vibe) applyTextOverlay();
+    renderIconChips(lang);
 
     updateBtn();
   }
@@ -874,8 +946,10 @@
     document.getElementById('label2').textContent       = c.label2;
     document.getElementById('label3').textContent       = c.label3;
     document.getElementById('label4').textContent       = c.label4;
+    document.getElementById('label5').textContent       = c.label5;
     document.getElementById('optionalTag').textContent  = c.optional;
     document.getElementById('optionalTag2').textContent = c.optional;
+    document.getElementById('optionalTag3').textContent = c.optional;
     document.getElementById('btnLabel').textContent     = c.btnLabel;
     document.getElementById('loadingText').textContent  = c.loading;
     document.getElementById('btnDownload').textContent  = c.download;
@@ -897,6 +971,7 @@
     // Reveal steps 3, 4 and generate
     revealStep('step3Reveal');
     revealStep('step4Reveal');
+    revealStep('step5Reveal');
     revealStep('genReveal');
 
     updateBtn();
@@ -995,12 +1070,17 @@
       ? `Include the text "${state.message.trim()}" written in stylized ${langLabel} font, integrated naturally into the sticker design.`
       : 'No text on the sticker.';
 
+    const iconClause = state.icon.trim()
+      ? `Also prominently feature a illustrated icon or shape of: ${state.icon.trim()}. Draw it as a fun graphic element integrated into the sticker composition.`
+      : '';
+
     const instruction =
       `You are a creative AI image prompt writer for digital stickers.\n` +
       `Generate a detailed image generation prompt for a sticker with this exact visual style:\n` +
       `${vibe.promptStyle}\n\n` +
       `Target audience language: ${langLabel}.\n` +
       `${messageClause}\n` +
+      `${iconClause}\n` +
       `The sticker must have: white background, thick bold sticker outline, centered composition, high quality.\n\n` +
       `Reply with ONLY the image generation prompt — no explanation, no markdown. Just the raw prompt text.`;
 
@@ -1028,10 +1108,9 @@
 
   function buildLocalPrompt() {
     const vibe = VIBES.find(v => v.id === state.vibe);
-    const msgPart = state.message.trim()
-      ? `, with the text "${state.message.trim()}" stylized in the design`
-      : '';
-    return `${vibe.promptStyle}${msgPart}. White background, bold sticker outline, centered, high quality, crisp details.`;
+    const msgPart  = state.message.trim() ? `, with the text "${state.message.trim()}" stylized in the design` : '';
+    const iconPart = state.icon.trim()    ? `, featuring an illustrated ${state.icon.trim()} icon as a graphic element` : '';
+    return `${vibe.promptStyle}${msgPart}${iconPart}. White background, bold sticker outline, centered, high quality, crisp details.`;
   }
 
   /* ── AI Image Generation (core logic unchanged) ── */
@@ -1152,10 +1231,14 @@
     document.getElementById('step2Reveal').classList.remove('visible');
     document.getElementById('step3Reveal').classList.remove('visible');
     document.getElementById('step4Reveal').classList.remove('visible');
+    document.getElementById('step5Reveal').classList.remove('visible');
     document.getElementById('genReveal').classList.remove('visible');
     document.getElementById('resultSection').classList.remove('visible');
     document.getElementById('stickerImg').src = '';
     document.getElementById('msgInput').value = '';
+    document.getElementById('iconInput').value = '';
+    document.querySelectorAll('.icon-chip').forEach(c => c.classList.remove('active'));
+    state.icon = '';
     clearUpload();
 
     // Reset to English
