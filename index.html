@@ -1,23 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StickerDrop ✨</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=Lalezar&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #7C3AED;
+      --primary:       #7C3AED;
       --primary-light: #EDE9FE;
-      --accent: #F59E0B;
-      --accent2: #EC4899;
-      --accent3: #10B981;
-      --text: #1F2937;
-      --text-muted: #6B7280;
-      --white: #FFFFFF;
-      --shadow: 0 4px 24px rgba(0,0,0,0.09);
-      --radius: 18px;
+      --accent:        #F59E0B;
+      --accent2:       #EC4899;
+      --accent3:       #10B981;
+      --text:          #1F2937;
+      --text-muted:    #6B7280;
+      --white:         #FFFFFF;
+      --shadow:        0 4px 24px rgba(0,0,0,0.09);
+      --radius:        24px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,7 +32,7 @@
     /* ── Header ── */
     header {
       text-align: center;
-      padding: 2.25rem 1rem 0.5rem;
+      padding: 2.25rem 1rem 0.75rem;
     }
 
     .header-deco {
@@ -68,12 +68,12 @@
 
     /* ── Container ── */
     .container {
-      max-width: 680px;
+      max-width: 640px;
       margin: 0 auto;
-      padding: 1.25rem 1.25rem 5rem;
+      padding: 1rem 1.25rem 5rem;
     }
 
-    /* ── API Key Setup banner ── */
+    /* ── API Key Setup banner (unchanged) ── */
     .api-setup {
       background: #FFFBEB;
       border: 2.5px dashed var(--accent);
@@ -124,33 +124,26 @@
     }
     .api-save-btn:hover { opacity: 0.88; }
 
-    .api-hint {
-      font-size: 0.78rem;
-      color: #92400E;
-      margin-top: 0.45rem;
-    }
+    .api-hint { font-size: 0.78rem; color: #92400E; margin-top: 0.45rem; }
     .api-hint a { color: #92400E; }
 
-    /* ── Step Cards ── */
-    .step-card {
+    /* ── Step block wrapper ── */
+    .step-block {
       background: var(--white);
       border-radius: var(--radius);
-      padding: 1.4rem 1.5rem;
+      padding: 1.5rem;
       margin-bottom: 1.1rem;
       box-shadow: var(--shadow);
       border: 2.5px solid transparent;
       transition: border-color 0.25s;
     }
-    .step-card.complete { border-color: #A7F3D0; }
+    .step-block.complete { border-color: #A7F3D0; }
 
-    .step-label {
-      font-family: 'Fredoka One', cursive;
-      font-size: 1.1rem;
-      color: var(--primary);
-      margin-bottom: 1rem;
+    .step-header {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.55rem;
+      margin-bottom: 1.1rem;
     }
 
     .step-num {
@@ -164,6 +157,13 @@
       justify-content: center;
       font-size: 0.85rem;
       flex-shrink: 0;
+      font-weight: 800;
+    }
+
+    .step-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: var(--primary);
     }
 
     .optional-tag {
@@ -171,97 +171,136 @@
       color: #9CA3AF;
       font-family: 'Nunito', sans-serif;
       font-weight: 600;
+      margin-left: 0.2rem;
     }
 
-    /* ── Chips ── */
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
+    /* ── Step reveal animation ── */
+    .step-reveal {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: max-height 0.55s ease, opacity 0.45s ease, transform 0.45s ease;
+    }
+    .step-reveal.visible {
+      max-height: 900px;
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    .chip {
-      padding: 0.42rem 0.95rem;
-      border-radius: 100px;
-      border: 2px solid #E5E7EB;
-      background: var(--white);
-      font-family: 'Nunito', sans-serif;
-      font-weight: 700;
-      font-size: 0.88rem;
+    /* ── Step 1: Language cards ── */
+    .lang-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .lang-card {
+      padding: 2rem 1rem;
+      border-radius: var(--radius);
+      border: 3px solid #E5E7EB;
+      background: white;
       cursor: pointer;
-      transition: all 0.14s;
-      color: var(--text);
-      user-select: none;
-      line-height: 1;
-    }
-    .chip:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-      transform: translateY(-1px);
-    }
-
-    .mood-chips .chip.active {
-      background: var(--accent2);
-      border-color: var(--accent2);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 14px rgba(236,72,153,0.32);
-    }
-
-    .style-chips .chip.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 14px rgba(124,58,237,0.32);
-    }
-
-    /* ── Word + Language row ── */
-    .word-row {
+      transition: all 0.22s;
       display: flex;
-      gap: 0.75rem;
+      flex-direction: column;
       align-items: center;
-      flex-wrap: wrap;
+      gap: 0.5rem;
+      box-shadow: var(--shadow);
     }
 
-    .word-input {
-      flex: 1;
-      min-width: 140px;
-      padding: 0.58rem 1.1rem;
+    .lang-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 32px rgba(124,58,237,0.2);
+    }
+
+    .lang-card.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 32px rgba(124,58,237,0.2);
+    }
+
+    .lang-flag  { font-size: 3rem; line-height: 1; }
+    .lang-label {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem;
+      color: var(--primary);
+    }
+    .lang-sublabel {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    /* ── Step 2: Vibe cards ── */
+    .vibe-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+
+    .vibe-card {
+      padding: 1.35rem 0.9rem;
+      border-radius: var(--radius);
+      border: 3px solid #E5E7EB;
+      background: white;
+      cursor: pointer;
+      transition: all 0.22s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .vibe-card:hover {
+      border-color: var(--accent2);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 32px rgba(236,72,153,0.2);
+    }
+
+    .vibe-card.active {
+      border-color: var(--accent2);
+      background: #FDF2F8;
+      transform: translateY(-4px);
+      box-shadow: 0 10px 32px rgba(236,72,153,0.2);
+    }
+
+    .vibe-emoji { font-size: 2.2rem; line-height: 1; }
+    .vibe-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.92rem;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+    .vibe-desc {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    /* ── Step 3: Message input ── */
+    .msg-input {
+      width: 100%;
+      padding: 0.8rem 1.1rem;
       border: 2px solid #E5E7EB;
-      border-radius: 100px;
+      border-radius: 16px;
       font-family: 'Nunito', sans-serif;
       font-weight: 700;
       font-size: 1rem;
       outline: none;
       transition: border-color 0.2s;
       background: white;
+      resize: none;
+      min-height: 72px;
+      color: var(--text);
     }
-    .word-input:focus { border-color: var(--primary); }
-    .word-input::placeholder { color: #D1D5DB; font-weight: 600; }
-
-    .lang-toggle {
-      display: flex;
-      border: 2.5px solid #E5E7EB;
-      border-radius: 100px;
-      overflow: hidden;
-    }
-
-    .lang-btn {
-      padding: 0.46rem 1rem;
-      border: none;
-      background: none;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 800;
-      font-size: 0.88rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      color: var(--text-muted);
-    }
-    .lang-btn.active {
-      background: var(--accent);
-      color: white;
-    }
+    .msg-input:focus { border-color: var(--primary); }
+    .msg-input::placeholder { color: #D1D5DB; font-weight: 600; }
 
     /* ── Generate Button ── */
     .generate-btn {
@@ -276,8 +315,8 @@
       color: white;
       box-shadow: 0 6px 22px rgba(124,58,237,0.38);
       letter-spacing: 0.4px;
-      margin-top: 0.5rem;
       transition: all 0.2s;
+      margin-bottom: 0.5rem;
     }
     .generate-btn:hover:not(:disabled) {
       transform: translateY(-3px);
@@ -285,7 +324,7 @@
     }
     .generate-btn:active:not(:disabled) { transform: translateY(0); }
     .generate-btn:disabled {
-      opacity: 0.38;
+      opacity: 0.35;
       cursor: not-allowed;
       box-shadow: none;
     }
@@ -297,7 +336,7 @@
       padding: 2rem 1.5rem;
       text-align: center;
       box-shadow: var(--shadow);
-      margin-top: 1.4rem;
+      margin-top: 1.1rem;
       display: none;
     }
     .result-section.visible { display: block; }
@@ -334,13 +373,9 @@
       to   { transform: translateY(-14px) rotate(8deg) scale(1.05); }
     }
 
-    .loading-dots {
-      display: flex;
-      gap: 7px;
-    }
+    .loading-dots { display: flex; gap: 7px; }
     .loading-dots span {
-      width: 11px;
-      height: 11px;
+      width: 11px; height: 11px;
       border-radius: 50%;
       animation: dot-pulse 1.2s ease-in-out infinite;
     }
@@ -353,17 +388,16 @@
       40%           { opacity: 1;   transform: scale(1.25); }
     }
 
-    .loading-text {
-      font-weight: 800;
-      color: var(--primary);
-      font-size: 0.95rem;
-    }
+    .loading-text { font-weight: 800; color: var(--primary); font-size: 0.95rem; }
 
-    /* ── Sticker image ── */
-    .sticker-wrap {
-      display: none;
+    /* ── Sticker container with overlay ── */
+    .sticker-outer {
+      position: relative;
+      display: inline-block;
       margin-bottom: 1.5rem;
     }
+
+    .sticker-wrap { display: none; }
     .sticker-wrap.show { display: inline-block; }
 
     .sticker-img {
@@ -372,13 +406,57 @@
       border-radius: 20px;
       object-fit: contain;
       display: block;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.13);
+      filter: drop-shadow(0 0 1px white) drop-shadow(0 0 5px rgba(0,0,0,0.2));
       animation: pop-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
     }
 
     @keyframes pop-in {
       from { transform: scale(0.7); opacity: 0; }
       to   { transform: scale(1);   opacity: 1; }
+    }
+
+    /* ── Text overlay ── */
+    .text-overlay {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 88%;
+      text-align: center;
+      pointer-events: none;
+      line-height: 1.35;
+      display: none;
+    }
+    .text-overlay.show { display: block; }
+
+    .text-overlay.style-outlined {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: white;
+      -webkit-text-stroke: 2.5px #111;
+      paint-order: stroke fill;
+      text-shadow: 2px 2px 0 #111, -1px -1px 0 #111;
+    }
+
+    .text-overlay.style-retro {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f5e6c8;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.7), 0 0 12px rgba(245,159,11,0.5);
+      letter-spacing: 0.06em;
+    }
+
+    .text-overlay.style-ios {
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 14px;
+      padding: 8px 16px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.14);
+      bottom: 7%;
     }
 
     /* ── Error box ── */
@@ -395,12 +473,7 @@
     .error-box.show { display: block; }
 
     /* ── Action buttons ── */
-    .action-btns {
-      display: none;
-      gap: 0.7rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+    .action-btns { display: none; gap: 0.7rem; justify-content: center; flex-wrap: wrap; }
     .action-btns.show { display: flex; }
 
     .action-btn {
@@ -424,8 +497,7 @@
       position: fixed;
       bottom: 1.5rem;
       right: 1.5rem;
-      width: 46px;
-      height: 46px;
+      width: 46px; height: 46px;
       border-radius: 50%;
       background: white;
       border: 2.5px solid #E5E7EB;
@@ -439,13 +511,23 @@
     }
     .settings-btn:hover { transform: rotate(35deg); }
 
-    /* ── Responsive ── */
+    /* ── RTL support ── */
+    [dir="rtl"] .step-header { flex-direction: row-reverse; }
+    [dir="rtl"] .msg-input   { text-align: right; direction: rtl; }
+    [dir="rtl"] .text-overlay { direction: rtl; }
+    [dir="rtl"] .lang-cards  { direction: rtl; }
+    [dir="rtl"] .optional-tag { margin-left: 0; margin-right: 0.2rem; }
+
+    /* ── Mobile ── */
     @media (max-width: 480px) {
-      .sticker-img           { width: 230px; height: 230px; }
-      .loading-wrap          { width: 230px; height: 230px; }
-      .word-row              { flex-direction: column; align-items: stretch; }
-      .lang-toggle           { align-self: flex-start; }
-      .step-card             { padding: 1.2rem; }
+      .sticker-img  { width: 240px; height: 240px; }
+      .loading-wrap { width: 240px; height: 240px; }
+      .lang-card    { padding: 1.5rem 0.75rem; }
+      .lang-flag    { font-size: 2.4rem; }
+      .lang-label   { font-size: 1.1rem; }
+      .vibe-card    { padding: 1.1rem 0.7rem; }
+      .vibe-emoji   { font-size: 1.8rem; }
+      .step-block   { padding: 1.2rem; }
     }
   </style>
 </head>
@@ -454,12 +536,12 @@
 <header>
   <div class="header-deco">✨ 🎨 ⭐</div>
   <div class="logo">StickerDrop</div>
-  <div class="tagline">AI-powered stickers, zero effort ✌️</div>
+  <div class="tagline" id="tagline">AI-powered stickers, zero effort ✌️</div>
 </header>
 
 <div class="container">
 
-  <!-- API Key banner -->
+  <!-- API Key banner (logic unchanged) -->
   <div class="api-setup" id="apiSetup">
     <div class="api-setup-label">🔑 Gemini API Key Required</div>
     <div class="api-setup-row">
@@ -469,40 +551,55 @@
     <p class="api-hint">Stored locally in your browser only. Get a free key at <a href="https://ai.google.dev" target="_blank">ai.google.dev</a></p>
   </div>
 
-  <!-- Step 1: Mood -->
-  <div class="step-card" id="moodCard">
-    <div class="step-label">
-      <span class="step-num">1</span> Pick a Mood
+  <!-- Step 1: Language -->
+  <div class="step-block" id="step1Block">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title" id="label1">Choose your language</span>
     </div>
-    <div class="chips mood-chips" id="moodChips"></div>
+    <div class="lang-cards">
+      <button class="lang-card" id="cardAR" onclick="selectLang('AR')">
+        <span class="lang-flag">🇸🇦</span>
+        <span class="lang-label" style="font-family:'Lalezar',sans-serif;font-size:1.5rem;">عربي</span>
+        <span class="lang-sublabel">Arabic</span>
+      </button>
+      <button class="lang-card" id="cardEN" onclick="selectLang('EN')">
+        <span class="lang-flag">🇬🇧</span>
+        <span class="lang-label">English</span>
+        <span class="lang-sublabel">إنجليزي</span>
+      </button>
+    </div>
   </div>
 
-  <!-- Step 2: Style -->
-  <div class="step-card" id="styleCard">
-    <div class="step-label">
-      <span class="step-num">2</span> Pick a Style
-    </div>
-    <div class="chips style-chips" id="styleChips"></div>
-  </div>
-
-  <!-- Step 3: Word + Language -->
-  <div class="step-card">
-    <div class="step-label">
-      <span class="step-num">3</span> Add a word &nbsp;<span class="optional-tag">(optional)</span>
-    </div>
-    <div class="word-row">
-      <input type="text" class="word-input" id="wordInput" placeholder="e.g. YOLO" maxlength="30">
-      <div class="lang-toggle">
-        <button class="lang-btn active" id="btnEN" onclick="setLang('EN')">EN</button>
-        <button class="lang-btn"        id="btnAR" onclick="setLang('AR')">AR</button>
+  <!-- Step 2: Vibe (revealed after language) -->
+  <div class="step-reveal" id="step2Reveal">
+    <div class="step-block" id="step2Block">
+      <div class="step-header">
+        <span class="step-num">2</span>
+        <span class="step-title" id="label2">Pick your vibe</span>
       </div>
+      <div class="vibe-grid" id="vibeGrid"></div>
     </div>
   </div>
 
-  <!-- Generate -->
-  <button class="generate-btn" id="generateBtn" onclick="generate()" disabled>
-    ✨ Generate Sticker
-  </button>
+  <!-- Step 3: Message (revealed after vibe) -->
+  <div class="step-reveal" id="step3Reveal">
+    <div class="step-block" id="step3Block">
+      <div class="step-header">
+        <span class="step-num">3</span>
+        <span class="step-title" id="label3">Add your message</span>
+        <span class="optional-tag" id="optionalTag">(optional)</span>
+      </div>
+      <textarea class="msg-input" id="msgInput" rows="2" placeholder="e.g. يا حبيبي / Say Something…" maxlength="120"></textarea>
+    </div>
+  </div>
+
+  <!-- Generate (revealed after vibe) -->
+  <div class="step-reveal" id="genReveal">
+    <button class="generate-btn" id="generateBtn" onclick="generate()" disabled>
+      ✨ <span id="btnLabel">Generate Sticker</span>
+    </button>
+  </div>
 
   <!-- Result -->
   <div class="result-section" id="resultSection">
@@ -511,56 +608,225 @@
     <div class="loading-wrap" id="loadingWrap">
       <div class="loading-emoji">🎨</div>
       <div class="loading-dots"><span></span><span></span><span></span></div>
-      <div class="loading-text">Crafting your sticker…</div>
+      <div class="loading-text" id="loadingText">Crafting your sticker…</div>
     </div>
 
     <div class="error-box" id="errorBox"></div>
 
     <div class="sticker-wrap" id="stickerWrap">
-      <img class="sticker-img" id="stickerImg" alt="Generated sticker">
+      <div class="sticker-outer">
+        <img class="sticker-img" id="stickerImg" alt="Generated sticker">
+        <div class="text-overlay" id="textOverlay"></div>
+      </div>
     </div>
 
     <div class="action-btns" id="actionBtns">
-      <button class="action-btn btn-download" onclick="downloadSticker()">⬇ Download</button>
-      <button class="action-btn btn-again"    onclick="tryAgain()">🔄 Try Again</button>
-      <button class="action-btn btn-reset"    onclick="startOver()">🔁 Start Over</button>
+      <button class="action-btn btn-download" id="btnDownload" onclick="downloadSticker()">⬇ Download</button>
+      <button class="action-btn btn-again"    id="btnAgain"    onclick="tryAgain()">🔄 Try Again</button>
+      <button class="action-btn btn-reset"    id="btnReset"    onclick="startOver()">🔁 Start Over</button>
     </div>
   </div>
 
-</div><!-- /container -->
+</div>
 
 <button class="settings-btn" onclick="toggleApiSetup()" title="API Settings">⚙️</button>
 
 <script>
-  /* ── Data ── */
-  const MOODS  = ['Funny','Cute','Savage','Wholesome','Spooky','Chill','Angry','Romantic','Confused','Proud'];
-  const STYLES = ['Cartoon','Pixel Art','Watercolor','Chibi','Retro','Flat','Sticker Pop','Comic Book','Minimalist','3D Render'];
+  /* ── Vibe Definitions ── */
+  const VIBES = [
+    {
+      id: 'funny',
+      emoji: '😂',
+      titleEN: 'Funny / Sarcastic',
+      titleAR: 'كوميدي / ساخر',
+      descEN: 'Minimalist memes & reaction faces',
+      descAR: 'ميمز ووجوه ساخرة',
+      promptStyle: 'Minimalist hand-drawn line art sticker, sarcastic cartoon expression, clean white background, high-contrast meme style, bold outlines. No text, no letters, no words.',
+      fontAR: 'Lalezar',
+      textStyleClass: 'style-outlined',
+    },
+    {
+      id: 'aesthetic',
+      emoji: '✨',
+      titleEN: 'Aesthetic / Pop-Art',
+      titleAR: 'جمالي / بوب آرت',
+      descEN: 'Vibrant Khaleeji pop-art vectors',
+      descAR: 'فن بوب خليجي زاهي الألوان',
+      promptStyle: 'Professional vector illustration, vibrant saturated colors, bold outlines, sticker-cut pop-art style, white background, clean glossy look. No text, no letters, no words.',
+      fontAR: 'Lalezar',
+      textStyleClass: 'style-outlined',
+    },
+    {
+      id: 'nostalgic',
+      emoji: '📜',
+      titleEN: 'Nostalgic / Retro',
+      titleAR: 'نوستالجيا / ريترو',
+      descEN: '1980s Saudi aesthetic, film grain',
+      descAR: 'أجواء الثمانينات السعودية',
+      promptStyle: 'Vintage 1980s Saudi pop-culture aesthetic, grainy analog film texture, nostalgic muted retro colors, warm tones, vintage album cover style, white background. No text, no letters, no words.',
+      fontAR: 'Amiri',
+      textStyleClass: 'style-retro',
+    },
+    {
+      id: 'systemAlert',
+      emoji: '💬',
+      titleEN: 'System Alert',
+      titleAR: 'تنبيه النظام',
+      descEN: 'iOS notification & error banners',
+      descAR: 'إشعارات وأخطاء بالعربي',
+      promptStyle: 'Flat iOS system notification banner design, clean white UI card, subtle shadow, app icon placeholder, ultra minimal clean design, white background. No text, no letters, no words.',
+      fontAR: 'Lalezar',
+      textStyleClass: 'style-ios',
+    },
+  ];
+
+  /* ── UI copy (bilingual) ── */
+  const COPY = {
+    EN: {
+      tagline:     'AI-powered stickers, zero effort ✌️',
+      label1:      'Choose your language',
+      label2:      'Pick your vibe',
+      label3:      'Add your message',
+      optional:    '(optional)',
+      btnLabel:    'Generate Sticker',
+      loading:     'Crafting your sticker…',
+      ready:       'Your sticker is ready! 🎉',
+      oops:        'Oops! Something went wrong 😅',
+      download:    '⬇ Download',
+      again:       '🔄 Try Again',
+      reset:       '🔁 Start Over',
+      placeholder: 'Say something…',
+    },
+    AR: {
+      tagline:     'ستيكرات بالذكاء الاصطناعي، بدون تعب ✌️',
+      label1:      'اختر لغتك',
+      label2:      'اختر الطابع',
+      label3:      'أضف رسالتك',
+      optional:    '(اختياري)',
+      btnLabel:    'اصنع ستيكر',
+      loading:     '…يتم تصميم ستيكرك',
+      ready:       '🎉 ستيكرك جاهز',
+      oops:        '😅 !حدث خطأ ما',
+      download:    '⬇ تحميل',
+      again:       '🔄 مرة ثانية',
+      reset:       '🔁 من البداية',
+      placeholder: '…يا حبيبي',
+    },
+  };
 
   /* ── State ── */
   const state = {
-    mood:   null,
-    style:  null,
-    word:   '',
-    lang:   'EN',
-    apiKey: localStorage.getItem('gemini_api_key') || ''
+    lang:   null,   // 'EN' | 'AR'
+    vibe:   null,   // vibe id string
+    message:'',
+    apiKey: localStorage.getItem('gemini_api_key') || '',
   };
 
   /* ── Boot ── */
   function init() {
-    renderChips('moodChips',  MOODS,  'mood');
-    renderChips('styleChips', STYLES, 'style');
+    renderVibeCards();
 
-    document.getElementById('wordInput').addEventListener('input', e => {
-      // No spaces allowed — enforce single word
-      e.target.value = e.target.value.replace(/\s/g, '');
-      state.word = e.target.value.trim();
+    document.getElementById('msgInput').addEventListener('input', e => {
+      state.message = e.target.value;
     });
 
     if (!state.apiKey) document.getElementById('apiSetup').classList.add('visible');
     updateBtn();
   }
 
-  /* ── API key management ── */
+  /* ── Render vibe cards ── */
+  function renderVibeCards() {
+    const grid = document.getElementById('vibeGrid');
+    grid.innerHTML = '';
+    VIBES.forEach(v => {
+      const btn = document.createElement('button');
+      btn.className = 'vibe-card';
+      btn.id = 'vibe_' + v.id;
+      const lang = state.lang || 'EN';
+      btn.innerHTML = `
+        <span class="vibe-emoji">${v.emoji}</span>
+        <span class="vibe-title">${lang === 'AR' ? v.titleAR : v.titleEN}</span>
+        <span class="vibe-desc">${lang === 'AR' ? v.descAR : v.descEN}</span>
+      `;
+      btn.onclick = () => selectVibe(v.id);
+      grid.appendChild(btn);
+    });
+  }
+
+  /* ── Language selection ── */
+  function selectLang(lang) {
+    state.lang = lang;
+
+    // Card active state
+    document.getElementById('cardEN').classList.toggle('active', lang === 'EN');
+    document.getElementById('cardAR').classList.toggle('active', lang === 'AR');
+
+    // Document direction + lang
+    document.getElementById('htmlRoot').lang = lang === 'AR' ? 'ar' : 'en';
+    document.body.dir = lang === 'AR' ? 'rtl' : 'ltr';
+
+    // Update all copy
+    applyCopy(lang);
+
+    // Mark step 1 complete
+    document.getElementById('step1Block').classList.add('complete');
+
+    // Reveal step 2
+    revealStep('step2Reveal');
+
+    // Re-render vibe cards in chosen language
+    renderVibeCards();
+
+    // If vibe was already picked (language switch), update overlay font
+    if (state.vibe) applyTextOverlay();
+
+    updateBtn();
+  }
+
+  /* ── Apply bilingual copy ── */
+  function applyCopy(lang) {
+    const c = COPY[lang];
+    document.getElementById('tagline').textContent     = c.tagline;
+    document.getElementById('label1').textContent      = c.label1;
+    document.getElementById('label2').textContent      = c.label2;
+    document.getElementById('label3').textContent      = c.label3;
+    document.getElementById('optionalTag').textContent = c.optional;
+    document.getElementById('btnLabel').textContent    = c.btnLabel;
+    document.getElementById('loadingText').textContent = c.loading;
+    document.getElementById('btnDownload').textContent = c.download;
+    document.getElementById('btnAgain').textContent    = c.again;
+    document.getElementById('btnReset').textContent    = c.reset;
+    document.getElementById('msgInput').placeholder    = c.placeholder;
+  }
+
+  /* ── Vibe selection ── */
+  function selectVibe(id) {
+    state.vibe = id;
+
+    document.querySelectorAll('.vibe-card').forEach(c => c.classList.remove('active'));
+    document.getElementById('vibe_' + id).classList.add('active');
+    document.getElementById('step2Block').classList.add('complete');
+
+    // Reveal step 3 and generate
+    revealStep('step3Reveal');
+    revealStep('genReveal');
+
+    updateBtn();
+  }
+
+  /* ── Reveal helper ── */
+  function revealStep(id) {
+    const el = document.getElementById(id);
+    if (el.classList.contains('visible')) return;
+    el.classList.add('visible');
+  }
+
+  /* ── Update generate button ── */
+  function updateBtn() {
+    document.getElementById('generateBtn').disabled = !(state.lang && state.vibe);
+  }
+
+  /* ── API key management (unchanged) ── */
   function saveApiKey() {
     const val = document.getElementById('apiKeyInput').value.trim();
     if (!val) return;
@@ -573,41 +839,9 @@
     document.getElementById('apiSetup').classList.toggle('visible');
   }
 
-  /* ── Chip rendering ── */
-  function renderChips(containerId, items, type) {
-    const wrap = document.getElementById(containerId);
-    items.forEach(item => {
-      const btn = document.createElement('button');
-      btn.className = 'chip';
-      btn.textContent = item;
-      btn.addEventListener('click', () => selectChip(btn, containerId, type, item));
-      wrap.appendChild(btn);
-    });
-  }
-
-  function selectChip(el, containerId, type, value) {
-    document.querySelectorAll(`#${containerId} .chip`).forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    state[type] = value;
-    document.getElementById(type === 'mood' ? 'moodCard' : 'styleCard').classList.add('complete');
-    updateBtn();
-  }
-
-  /* ── Language toggle ── */
-  function setLang(lang) {
-    state.lang = lang;
-    document.getElementById('btnEN').classList.toggle('active', lang === 'EN');
-    document.getElementById('btnAR').classList.toggle('active', lang === 'AR');
-  }
-
-  /* ── Generate button state ── */
-  function updateBtn() {
-    document.getElementById('generateBtn').disabled = !(state.mood && state.style);
-  }
-
   /* ─────────────── Generation ─────────────── */
   async function generate() {
-    if (!state.mood || !state.style) return;
+    if (!state.lang || !state.vibe) return;
     if (!state.apiKey) {
       document.getElementById('apiSetup').classList.add('visible');
       return;
@@ -625,20 +859,17 @@
   }
 
   async function buildPromptWithGemini() {
-    const langLabel  = state.lang === 'AR' ? 'Arabic script' : 'English';
-    const wordClause = state.word
-      ? `Include the word "${state.word}" rendered clearly in ${langLabel} using a fun, stylized font integrated into the sticker design.`
-      : 'No text on the sticker.';
+    const vibe = VIBES.find(v => v.id === state.vibe);
+    const langLabel = state.lang === 'AR' ? 'Arabic' : 'English';
 
     const instruction =
       `You are a creative AI image prompt writer for digital stickers.\n` +
-      `Generate a detailed image generation prompt for a sticker with these properties:\n` +
-      `- Mood/vibe: ${state.mood}\n` +
-      `- Art style: ${state.style}\n` +
-      `- ${wordClause}\n\n` +
-      `The sticker must have: white or transparent background, thick bold sticker outline, vibrant high-saturation colors, ` +
-      `a fun character or scene that expresses the mood, high quality and crisp details.\n\n` +
-      `Reply with ONLY the image generation prompt — no explanation, no markdown, no intro. Just the raw prompt text.`;
+      `Generate a detailed image generation prompt for a sticker with this exact visual style:\n` +
+      `${vibe.promptStyle}\n\n` +
+      `Target audience language: ${langLabel}.\n` +
+      `CRITICAL: Do NOT include any text, words, letters, numbers, or typography in the image. The image should be purely visual.\n` +
+      `The sticker must have: white background, thick bold sticker outline, centered composition, high quality.\n\n` +
+      `Reply with ONLY the image generation prompt — no explanation, no markdown. Just the raw prompt text.`;
 
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKey}`,
@@ -652,7 +883,7 @@
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
       const msg = errData?.error?.message || `Gemini API error (${res.status})`;
-      console.warn('Gemini failed, falling back to local prompt builder:', msg);
+      console.warn('Gemini text model failed, using local prompt:', msg);
       return buildLocalPrompt();
     }
 
@@ -663,57 +894,15 @@
   }
 
   function buildLocalPrompt() {
-    const moodMap = {
-      Funny:     'a hilarious laughing character, comedic expression, joke vibes',
-      Cute:      'an adorable kawaii character with big sparkly eyes and rosy cheeks',
-      Savage:    'a cool unbothered character with a smirk, dripping confidence',
-      Wholesome: 'a warm happy character spreading positivity and good vibes',
-      Spooky:    'a cute but eerie ghost or monster, halloween vibes',
-      Chill:     'a relaxed laid-back character wearing sunglasses, total zen',
-      Angry:     'a feisty fuming character with fire and steam, exaggerated rage',
-      Romantic:  'a lovey-dovey character surrounded by hearts and flowers',
-      Confused:  'a baffled character with question marks and swirly eyes',
-      Proud:     'a triumphant character striking a victorious pose, chest puffed',
-    };
-    const styleMap = {
-      'Cartoon':      'cartoon illustration style, smooth lines, bright flat colors',
-      'Pixel Art':    'retro pixel art style, 8-bit chunky pixels',
-      'Watercolor':   'soft dreamy watercolor painting style, gentle color bleeds',
-      'Chibi':        'chibi anime style, super-deformed tiny body, huge head',
-      'Retro':        'vintage retro 70s illustration style, warm muted tones',
-      'Flat':         'modern flat design, clean geometric shapes, no gradients',
-      'Sticker Pop':  'bold sticker pop art style, vivid neon colors, halftone dots',
-      'Comic Book':   'classic comic book style, thick ink lines, Ben-Day dot shading',
-      'Minimalist':   'minimalist line art style, simple elegant strokes',
-      '3D Render':    'glossy 3D render style, soft shadows, inflated toy-like look',
-    };
-
-    const langLabel = state.lang === 'AR' ? 'Arabic calligraphy script' : 'English bold font';
-    const wordPart  = state.word
-      ? `, with the word "${state.word}" written in stylized ${langLabel} clearly visible on the sticker`
-      : '';
-
-    const moodDesc  = moodMap[state.mood]  || state.mood;
-    const styleDesc = styleMap[state.style] || state.style;
-
-    return `A fun digital sticker of ${moodDesc}${wordPart}, rendered in ${styleDesc}, ` +
-           `white background, thick bold black sticker outline, vibrant high-saturation colors, ` +
-           `high quality, crisp clean details, sticker sheet ready.`;
+    const vibe = VIBES.find(v => v.id === state.vibe);
+    return `${vibe.promptStyle} No text, no letters, no words. White background, bold sticker outline, centered, high quality, crisp details.`;
   }
 
-  /* ── AI Image Generation Service (Gemini 2.0 Flash Experimental) ── */
-
+  /* ── AI Image Generation (core logic unchanged) ── */
   const STICKER_SUFFIX = 'sticker, white background, bold outline, centered, high contrast';
 
-  /**
-   * generateImage(prompt, style?)
-   * Calls Gemini 2.0 Flash experimental image generation.
-   * Returns a base64 data URL — works cross-origin, no CORS issues.
-   */
-  async function generateImage(prompt, style) {
-    const full = style
-      ? `${prompt}, ${style}, ${STICKER_SUFFIX}`
-      : `${prompt}, ${STICKER_SUFFIX}`;
+  async function generateImage(prompt) {
+    const full = `${prompt}, ${STICKER_SUFFIX}`;
 
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${state.apiKey}`,
@@ -740,13 +929,8 @@
     return `data:${mimeType};base64,${b64}`;
   }
 
-  /**
-   * renderSticker(prompt)
-   * Fetches image from Gemini then renders it.
-   * Supports both uploaded files and AI-generated data URLs via the same img handler.
-   */
   async function renderSticker(prompt) {
-    const dataUrl = await generateImage(prompt, state.style);
+    const dataUrl = await generateImage(prompt);
     return loadImageURL(dataUrl);
   }
 
@@ -760,8 +944,32 @@
     });
   }
 
+  /* ── Text overlay ── */
+  function applyTextOverlay() {
+    const overlay = document.getElementById('textOverlay');
+    const vibe = VIBES.find(v => v.id === state.vibe);
+    const message = state.message.trim();
+
+    if (!message || !vibe) {
+      overlay.classList.remove('show');
+      overlay.textContent = '';
+      return;
+    }
+
+    // Font
+    const fontFamily = state.lang === 'AR' ? `'${vibe.fontAR}', sans-serif` : "'Nunito', sans-serif";
+    overlay.style.fontFamily = fontFamily;
+    overlay.style.direction  = state.lang === 'AR' ? 'rtl' : 'ltr';
+
+    // Style class
+    overlay.className = 'text-overlay show ' + vibe.textStyleClass;
+    overlay.textContent = message;
+  }
+
   /* ─────────────── UI State Machine ─────────────── */
   function setUIState(mode, message) {
+    const lang       = state.lang || 'EN';
+    const c          = COPY[lang];
     const section    = document.getElementById('resultSection');
     const loadWrap   = document.getElementById('loadingWrap');
     const errBox     = document.getElementById('errorBox');
@@ -770,25 +978,22 @@
     const titleEl    = document.getElementById('resultTitle');
 
     section.classList.add('visible');
-
-    // Reset all sub-states
     loadWrap.classList.remove('show');
     errBox.classList.remove('show');
     stickerWrap.classList.remove('show');
     actionBtns.classList.remove('show');
 
     if (mode === 'loading') {
-      titleEl.textContent = 'Creating your sticker… ✨';
+      titleEl.textContent = c.loading;
       loadWrap.classList.add('show');
       section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-    else if (mode === 'result') {
-      titleEl.textContent = 'Your sticker is ready! 🎉';
+    } else if (mode === 'result') {
+      titleEl.textContent = c.ready;
       stickerWrap.classList.add('show');
       actionBtns.classList.add('show');
-    }
-    else if (mode === 'error') {
-      titleEl.textContent = 'Oops! Something went wrong 😅';
+      applyTextOverlay();
+    } else if (mode === 'error') {
+      titleEl.textContent = c.oops;
       errBox.textContent = `😬 ${message}`;
       errBox.classList.add('show');
       actionBtns.classList.add('show');
@@ -796,30 +1001,114 @@
   }
 
   /* ─────────────── Actions ─────────────── */
-  function downloadSticker() {
-    const img = document.getElementById('stickerImg');
-    const a = document.createElement('a');
-    a.href = img.src;
-    a.download = `stickerdrop-${state.mood}-${state.style}-${Date.now()}.png`.toLowerCase().replace(/\s+/g, '-');
-    a.click();
+  async function downloadSticker() {
+    const img     = document.getElementById('stickerImg');
+    const message = state.message.trim();
+    const vibe    = VIBES.find(v => v.id === state.vibe);
+
+    if (!message) {
+      // No overlay — direct download
+      const a = document.createElement('a');
+      a.href = img.src;
+      a.download = `stickerdrop-${state.vibe}-${Date.now()}.png`;
+      a.click();
+      return;
+    }
+
+    // Compose image + text on canvas
+    await document.fonts.ready;
+    const canvas = document.createElement('canvas');
+    const size   = 1024;
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    const drawImg = new Image();
+    drawImg.onload = () => {
+      ctx.drawImage(drawImg, 0, 0, size, size);
+
+      const fontFamily = state.lang === 'AR' ? vibe.fontAR : 'Nunito';
+      const fontSize   = Math.round(size * 0.085);
+      ctx.font         = `bold ${fontSize}px ${fontFamily}`;
+      ctx.textAlign    = 'center';
+      ctx.direction    = state.lang === 'AR' ? 'rtl' : 'ltr';
+      ctx.textBaseline = 'bottom';
+
+      const x = size / 2;
+      const y = size * 0.9;
+
+      if (vibe.textStyleClass === 'style-ios') {
+        // Draw pill background
+        const tw = ctx.measureText(message).width + 48;
+        const th = fontSize + 24;
+        const bx = (size - tw) / 2;
+        const by = y - th;
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        roundRect(ctx, bx, by, tw, th, 18);
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillText(message, x, y - 8);
+      } else if (vibe.textStyleClass === 'style-retro') {
+        ctx.fillStyle   = '#f5e6c8';
+        ctx.shadowColor = 'rgba(0,0,0,0.7)';
+        ctx.shadowBlur  = 8;
+        ctx.fillText(message, x, y);
+        ctx.shadowBlur  = 0;
+      } else {
+        // Outlined style
+        ctx.lineWidth   = fontSize * 0.12;
+        ctx.strokeStyle = '#111';
+        ctx.strokeText(message, x, y);
+        ctx.fillStyle   = 'white';
+        ctx.fillText(message, x, y);
+      }
+
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `stickerdrop-${state.vibe}-${Date.now()}.png`;
+      a.click();
+    };
+    drawImg.src = img.src;
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    ctx.fill();
   }
 
   function tryAgain() { generate(); }
 
   function startOver() {
-    state.mood  = null;
-    state.style = null;
-    state.word  = '';
-    state.lang  = 'EN';
+    state.lang    = null;
+    state.vibe    = null;
+    state.message = '';
 
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    document.getElementById('moodCard').classList.remove('complete');
-    document.getElementById('styleCard').classList.remove('complete');
-    document.getElementById('wordInput').value = '';
-    document.getElementById('btnEN').classList.add('active');
-    document.getElementById('btnAR').classList.remove('active');
+    document.getElementById('cardEN').classList.remove('active');
+    document.getElementById('cardAR').classList.remove('active');
+    document.querySelectorAll('.vibe-card').forEach(c => c.classList.remove('active'));
+    document.getElementById('step1Block').classList.remove('complete');
+    document.getElementById('step2Block').classList.remove('complete');
+    document.getElementById('step2Reveal').classList.remove('visible');
+    document.getElementById('step3Reveal').classList.remove('visible');
+    document.getElementById('genReveal').classList.remove('visible');
     document.getElementById('resultSection').classList.remove('visible');
     document.getElementById('stickerImg').src = '';
+    document.getElementById('msgInput').value = '';
+    document.getElementById('textOverlay').className = 'text-overlay';
+    document.getElementById('textOverlay').textContent = '';
+
+    // Reset to English
+    document.getElementById('htmlRoot').lang = 'en';
+    document.body.dir = 'ltr';
+    applyCopy('EN');
 
     updateBtn();
     window.scrollTo({ top: 0, behavior: 'smooth' });
