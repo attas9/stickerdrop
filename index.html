@@ -537,14 +537,12 @@
   const STYLES = ['Cartoon','Pixel Art','Watercolor','Chibi','Retro','Flat','Sticker Pop','Comic Book','Minimalist','3D Render'];
 
   /* ── State ── */
-  const DEFAULT_API_KEY = 'AIzaSyDEW-rr4YFpIvfbWiuinZobQDLKSDyIbtg';
-
   const state = {
     mood:   null,
     style:  null,
     word:   '',
     lang:   'EN',
-    apiKey: localStorage.getItem('gemini_api_key') || DEFAULT_API_KEY
+    apiKey: localStorage.getItem('gemini_api_key') || ''
   };
 
   /* ── Boot ── */
