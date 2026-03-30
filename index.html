@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StickerDrop ✨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #7C3AED;
+      --primary-light: #EDE9FE;
+      --accent: #F59E0B;
+      --accent2: #EC4899;
+      --accent3: #10B981;
+      --text: #1F2937;
+      --text-muted: #6B7280;
+      --white: #FFFFFF;
+      --shadow: 0 4px 24px rgba(0,0,0,0.09);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(145deg, #FFF0FA 0%, #F0EEFF 40%, #FFF8E7 100%);
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      padding: 2.25rem 1rem 0.5rem;
+    }
+
+    .header-deco {
+      font-size: 1.6rem;
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-6px); }
+    }
+
+    .logo {
+      font-family: 'Fredoka One', cursive;
+      font-size: clamp(2.6rem, 7vw, 4rem);
+      background: linear-gradient(135deg, #7C3AED 0%, #EC4899 55%, #F59E0B 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+
+    .tagline {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Container ── */
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 1.25rem 1.25rem 5rem;
+    }
+
+    /* ── API Key Setup banner ── */
+    .api-setup {
+      background: #FFFBEB;
+      border: 2.5px dashed var(--accent);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      display: none;
+    }
+    .api-setup.visible { display: block; }
+
+    .api-setup-label {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.05rem;
+      color: #92400E;
+      margin-bottom: 0.7rem;
+    }
+
+    .api-setup-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .api-key-input {
+      flex: 1;
+      padding: 0.55rem 1rem;
+      border: 2px solid #FCD34D;
+      border-radius: 100px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      outline: none;
+      background: white;
+      transition: border-color 0.2s;
+    }
+    .api-key-input:focus { border-color: var(--accent); }
+
+    .api-save-btn {
+      padding: 0.55rem 1.2rem;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 100px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .api-save-btn:hover { opacity: 0.88; }
+
+    .api-hint {
+      font-size: 0.78rem;
+      color: #92400E;
+      margin-top: 0.45rem;
+    }
+    .api-hint a { color: #92400E; }
+
+    /* ── Step Cards ── */
+    .step-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.5rem;
+      margin-bottom: 1.1rem;
+      box-shadow: var(--shadow);
+      border: 2.5px solid transparent;
+      transition: border-color 0.25s;
+    }
+    .step-card.complete { border-color: #A7F3D0; }
+
+    .step-label {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .step-num {
+      background: var(--primary);
+      color: white;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .optional-tag {
+      font-size: 0.82rem;
+      color: #9CA3AF;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 600;
+    }
+
+    /* ── Chips ── */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .chip {
+      padding: 0.42rem 0.95rem;
+      border-radius: 100px;
+      border: 2px solid #E5E7EB;
+      background: var(--white);
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.14s;
+      color: var(--text);
+      user-select: none;
+      line-height: 1;
+    }
+    .chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .mood-chips .chip.active {
+      background: var(--accent2);
+      border-color: var(--accent2);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(236,72,153,0.32);
+    }
+
+    .style-chips .chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(124,58,237,0.32);
+    }
+
+    /* ── Word + Language row ── */
+    .word-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .word-input {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.58rem 1.1rem;
+      border: 2px solid #E5E7EB;
+      border-radius: 100px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      background: white;
+    }
+    .word-input:focus { border-color: var(--primary); }
+    .word-input::placeholder { color: #D1D5DB; font-weight: 600; }
+
+    .lang-toggle {
+      display: flex;
+      border: 2.5px solid #E5E7EB;
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .lang-btn {
+      padding: 0.46rem 1rem;
+      border: none;
+      background: none;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text-muted);
+    }
+    .lang-btn.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* ── Generate Button ── */
+    .generate-btn {
+      width: 100%;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 100px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.35rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+      color: white;
+      box-shadow: 0 6px 22px rgba(124,58,237,0.38);
+      letter-spacing: 0.4px;
+      margin-top: 0.5rem;
+      transition: all 0.2s;
+    }
+    .generate-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(124,58,237,0.45);
+    }
+    .generate-btn:active:not(:disabled) { transform: translateY(0); }
+    .generate-btn:disabled {
+      opacity: 0.38;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* ── Result Section ── */
+    .result-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      margin-top: 1.4rem;
+      display: none;
+    }
+    .result-section.visible { display: block; }
+
+    .result-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.3rem;
+      color: var(--primary);
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Loading ── */
+    .loading-wrap {
+      width: 260px;
+      height: 260px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #F3E8FF, #FCE7F3, #FEF3C7);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin: 0 auto 1.5rem;
+    }
+    .loading-wrap.show { display: flex; }
+
+    .loading-emoji {
+      font-size: 3.2rem;
+      animation: spin-bounce 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes spin-bounce {
+      from { transform: translateY(0) rotate(-8deg) scale(0.95); }
+      to   { transform: translateY(-14px) rotate(8deg) scale(1.05); }
+    }
+
+    .loading-dots {
+      display: flex;
+      gap: 7px;
+    }
+    .loading-dots span {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      animation: dot-pulse 1.2s ease-in-out infinite;
+    }
+    .loading-dots span:nth-child(1) { background: var(--primary);  animation-delay: 0s; }
+    .loading-dots span:nth-child(2) { background: var(--accent2);  animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { background: var(--accent);   animation-delay: 0.4s; }
+
+    @keyframes dot-pulse {
+      0%, 80%, 100% { opacity: 0.2; transform: scale(0.75); }
+      40%           { opacity: 1;   transform: scale(1.25); }
+    }
+
+    .loading-text {
+      font-weight: 800;
+      color: var(--primary);
+      font-size: 0.95rem;
+    }
+
+    /* ── Sticker image ── */
+    .sticker-wrap {
+      display: none;
+      margin-bottom: 1.5rem;
+    }
+    .sticker-wrap.show { display: inline-block; }
+
+    .sticker-img {
+      width: 280px;
+      height: 280px;
+      border-radius: 20px;
+      object-fit: contain;
+      display: block;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.13);
+      animation: pop-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes pop-in {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    /* ── Error box ── */
+    .error-box {
+      background: #FEF2F2;
+      border: 2px solid #FECACA;
+      border-radius: 12px;
+      padding: 0.9rem 1.4rem;
+      color: #DC2626;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .error-box.show { display: block; }
+
+    /* ── Action buttons ── */
+    .action-btns {
+      display: none;
+      gap: 0.7rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .action-btns.show { display: flex; }
+
+    .action-btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 100px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 2px solid transparent;
+    }
+    .action-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.14); }
+
+    .btn-download { background: var(--accent3); color: white; border-color: var(--accent3); }
+    .btn-again    { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+    .btn-reset    { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
+
+    /* ── Settings cog ── */
+    .settings-btn {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: white;
+      border: 2.5px solid #E5E7EB;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.25s;
+    }
+    .settings-btn:hover { transform: rotate(35deg); }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .sticker-img           { width: 230px; height: 230px; }
+      .loading-wrap          { width: 230px; height: 230px; }
+      .word-row              { flex-direction: column; align-items: stretch; }
+      .lang-toggle           { align-self: flex-start; }
+      .step-card             { padding: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-deco">✨ 🎨 ⭐</div>
+  <div class="logo">StickerDrop</div>
+  <div class="tagline">AI-powered stickers, zero effort ✌️</div>
+</header>
+
+<div class="container">
+
+  <!-- API Key banner -->
+  <div class="api-setup" id="apiSetup">
+    <div class="api-setup-label">🔑 Gemini API Key Required</div>
+    <div class="api-setup-row">
+      <input type="password" class="api-key-input" id="apiKeyInput" placeholder="Paste your Gemini API key…">
+      <button class="api-save-btn" onclick="saveApiKey()">Save</button>
+    </div>
+    <p class="api-hint">Stored locally in your browser only. Get a free key at <a href="https://ai.google.dev" target="_blank">ai.google.dev</a></p>
+  </div>
+
+  <!-- Step 1: Mood -->
+  <div class="step-card" id="moodCard">
+    <div class="step-label">
+      <span class="step-num">1</span> Pick a Mood
+    </div>
+    <div class="chips mood-chips" id="moodChips"></div>
+  </div>
+
+  <!-- Step 2: Style -->
+  <div class="step-card" id="styleCard">
+    <div class="step-label">
+      <span class="step-num">2</span> Pick a Style
+    </div>
+    <div class="chips style-chips" id="styleChips"></div>
+  </div>
+
+  <!-- Step 3: Word + Language -->
+  <div class="step-card">
+    <div class="step-label">
+      <span class="step-num">3</span> Add a word &nbsp;<span class="optional-tag">(optional)</span>
+    </div>
+    <div class="word-row">
+      <input type="text" class="word-input" id="wordInput" placeholder="e.g. YOLO" maxlength="30">
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btnEN" onclick="setLang('EN')">EN</button>
+        <button class="lang-btn"        id="btnAR" onclick="setLang('AR')">AR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate -->
+  <button class="generate-btn" id="generateBtn" onclick="generate()" disabled>
+    ✨ Generate Sticker
+  </button>
+
+  <!-- Result -->
+  <div class="result-section" id="resultSection">
+    <div class="result-title" id="resultTitle">Your sticker is ready! 🎉</div>
+
+    <div class="loading-wrap" id="loadingWrap">
+      <div class="loading-emoji">🎨</div>
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div class="loading-text">Crafting your sticker…</div>
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <div class="sticker-wrap" id="stickerWrap">
+      <img class="sticker-img" id="stickerImg" alt="Generated sticker">
+    </div>
+
+    <div class="action-btns" id="actionBtns">
+      <button class="action-btn btn-download" onclick="downloadSticker()">⬇ Download</button>
+      <button class="action-btn btn-again"    onclick="tryAgain()">🔄 Try Again</button>
+      <button class="action-btn btn-reset"    onclick="startOver()">🔁 Start Over</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<button class="settings-btn" onclick="toggleApiSetup()" title="API Settings">⚙️</button>
+
+<script>
+  /* ── Data ── */
+  const MOODS  = ['Funny','Cute','Savage','Wholesome','Spooky','Chill','Angry','Romantic','Confused','Proud'];
+  const STYLES = ['Cartoon','Pixel Art','Watercolor','Chibi','Retro','Flat','Sticker Pop','Comic Book','Minimalist','3D Render'];
+
+  /* ── State ── */
+  const DEFAULT_API_KEY = 'AIzaSyBwRk1QHzu56FgjwQ_CACvpYg6cZ0l57VI';
+
+  const state = {
+    mood:   null,
+    style:  null,
+    word:   '',
+    lang:   'EN',
+    apiKey: localStorage.getItem('gemini_api_key') || DEFAULT_API_KEY
+  };
+
+  /* ── Boot ── */
+  function init() {
+    renderChips('moodChips',  MOODS,  'mood');
+    renderChips('styleChips', STYLES, 'style');
+
+    document.getElementById('wordInput').addEventListener('input', e => {
+      // No spaces allowed — enforce single word
+      e.target.value = e.target.value.replace(/\s/g, '');
+      state.word = e.target.value.trim();
+    });
+
+    if (!state.apiKey) document.getElementById('apiSetup').classList.add('visible');
+    updateBtn();
+  }
+
+  /* ── API key management ── */
+  function saveApiKey() {
+    const val = document.getElementById('apiKeyInput').value.trim();
+    if (!val) return;
+    state.apiKey = val;
+    localStorage.setItem('gemini_api_key', val);
+    document.getElementById('apiSetup').classList.remove('visible');
+  }
+
+  function toggleApiSetup() {
+    document.getElementById('apiSetup').classList.toggle('visible');
+  }
+
+  /* ── Chip rendering ── */
+  function renderChips(containerId, items, type) {
+    const wrap = document.getElementById(containerId);
+    items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.textContent = item;
+      btn.addEventListener('click', () => selectChip(btn, containerId, type, item));
+      wrap.appendChild(btn);
+    });
+  }
+
+  function selectChip(el, containerId, type, value) {
+    document.querySelectorAll(`#${containerId} .chip`).forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    state[type] = value;
+    document.getElementById(type === 'mood' ? 'moodCard' : 'styleCard').classList.add('complete');
+    updateBtn();
+  }
+
+  /* ── Language toggle ── */
+  function setLang(lang) {
+    state.lang = lang;
+    document.getElementById('btnEN').classList.toggle('active', lang === 'EN');
+    document.getElementById('btnAR').classList.toggle('active', lang === 'AR');
+  }
+
+  /* ── Generate button state ── */
+  function updateBtn() {
+    document.getElementById('generateBtn').disabled = !(state.mood && state.style);
+  }
+
+  /* ─────────────── Generation ─────────────── */
+  async function generate() {
+    if (!state.mood || !state.style) return;
+    if (!state.apiKey) {
+      document.getElementById('apiSetup').classList.add('visible');
+      return;
+    }
+
+    setUIState('loading');
+
+    try {
+      const prompt = await buildPromptWithGemini();
+      await renderStickerFromPollinations(prompt);
+    } catch (err) {
+      console.error(err);
+      setUIState('error', err.message || 'Something went wrong — please try again.');
+    }
+  }
+
+  async function buildPromptWithGemini() {
+    const langLabel  = state.lang === 'AR' ? 'Arabic script' : 'English';
+    const wordClause = state.word
+      ? `Include the word "${state.word}" rendered clearly in ${langLabel} using a fun, stylized font integrated into the sticker design.`
+      : 'No text on the sticker.';
+
+    const instruction =
+      `You are a creative AI image prompt writer for digital stickers.\n` +
+      `Generate a detailed image generation prompt for a sticker with these properties:\n` +
+      `- Mood/vibe: ${state.mood}\n` +
+      `- Art style: ${state.style}\n` +
+      `- ${wordClause}\n\n` +
+      `The sticker must have: white or transparent background, thick bold sticker outline, vibrant high-saturation colors, ` +
+      `a fun character or scene that expresses the mood, high quality and crisp details.\n\n` +
+      `Reply with ONLY the image generation prompt — no explanation, no markdown, no intro. Just the raw prompt text.`;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: instruction }] }] })
+      }
+    );
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const msg = errData?.error?.message || `Gemini API error (${res.status})`;
+      console.warn('Gemini failed, falling back to local prompt builder:', msg);
+      return buildLocalPrompt();
+    }
+
+    const data = await res.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (!text) return buildLocalPrompt();
+    return text;
+  }
+
+  function buildLocalPrompt() {
+    const moodMap = {
+      Funny:     'a hilarious laughing character, comedic expression, joke vibes',
+      Cute:      'an adorable kawaii character with big sparkly eyes and rosy cheeks',
+      Savage:    'a cool unbothered character with a smirk, dripping confidence',
+      Wholesome: 'a warm happy character spreading positivity and good vibes',
+      Spooky:    'a cute but eerie ghost or monster, halloween vibes',
+      Chill:     'a relaxed laid-back character wearing sunglasses, total zen',
+      Angry:     'a feisty fuming character with fire and steam, exaggerated rage',
+      Romantic:  'a lovey-dovey character surrounded by hearts and flowers',
+      Confused:  'a baffled character with question marks and swirly eyes',
+      Proud:     'a triumphant character striking a victorious pose, chest puffed',
+    };
+    const styleMap = {
+      'Cartoon':      'cartoon illustration style, smooth lines, bright flat colors',
+      'Pixel Art':    'retro pixel art style, 8-bit chunky pixels',
+      'Watercolor':   'soft dreamy watercolor painting style, gentle color bleeds',
+      'Chibi':        'chibi anime style, super-deformed tiny body, huge head',
+      'Retro':        'vintage retro 70s illustration style, warm muted tones',
+      'Flat':         'modern flat design, clean geometric shapes, no gradients',
+      'Sticker Pop':  'bold sticker pop art style, vivid neon colors, halftone dots',
+      'Comic Book':   'classic comic book style, thick ink lines, Ben-Day dot shading',
+      'Minimalist':   'minimalist line art style, simple elegant strokes',
+      '3D Render':    'glossy 3D render style, soft shadows, inflated toy-like look',
+    };
+
+    const langLabel = state.lang === 'AR' ? 'Arabic calligraphy script' : 'English bold font';
+    const wordPart  = state.word
+      ? `, with the word "${state.word}" written in stylized ${langLabel} clearly visible on the sticker`
+      : '';
+
+    const moodDesc  = moodMap[state.mood]  || state.mood;
+    const styleDesc = styleMap[state.style] || state.style;
+
+    return `A fun digital sticker of ${moodDesc}${wordPart}, rendered in ${styleDesc}, ` +
+           `white background, thick bold black sticker outline, vibrant high-saturation colors, ` +
+           `high quality, crisp clean details, sticker sheet ready.`;
+  }
+
+  async function renderStickerFromPollinations(prompt) {
+    // Submit generation job to Stable Horde (free, anonymous key)
+    const submitRes = await fetch('https://stablehorde.net/api/v2/generate/async', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': '0000000000' },
+      body: JSON.stringify({
+        prompt,
+        params: { width: 512, height: 512, steps: 25, n: 1, karras: true },
+        nsfw: false,
+        censor_nsfw: true,
+        models: ['Deliberate']
+      })
+    });
+    if (!submitRes.ok) throw new Error(`Image service error (${submitRes.status}) — try again.`);
+    const { id } = await submitRes.json();
+    if (!id) throw new Error('No job ID returned — try again.');
+
+    // Poll until done (up to 3 minutes)
+    const deadline = Date.now() + 180000;
+    while (Date.now() < deadline) {
+      await new Promise(r => setTimeout(r, 4000));
+      const statusRes = await fetch(`https://stablehorde.net/api/v2/generate/check/${id}`);
+      const status    = await statusRes.json();
+      if (status.faulted) throw new Error('Image generation failed — try again.');
+      if (!status.done)   continue;
+
+      // Fetch full result
+      const resultRes = await fetch(`https://stablehorde.net/api/v2/generate/status/${id}`);
+      const result    = await resultRes.json();
+      const imgData   = result?.generations?.[0]?.img;
+      if (!imgData) throw new Error('No image returned — try again.');
+
+      // Stable Horde returns either a URL or a base64 string
+      const imgSrc = imgData.startsWith('http') ? imgData : `data:image/webp;base64,${imgData}`;
+      const img = document.getElementById('stickerImg');
+      img.src = imgSrc;
+      img.dataset.blobUrl = imgSrc;
+      setUIState('result');
+      return;
+    }
+    throw new Error('Image timed out — the service is busy, try again.');
+  }
+
+  /* ─────────────── UI State Machine ─────────────── */
+  function setUIState(mode, message) {
+    const section    = document.getElementById('resultSection');
+    const loadWrap   = document.getElementById('loadingWrap');
+    const errBox     = document.getElementById('errorBox');
+    const stickerWrap= document.getElementById('stickerWrap');
+    const actionBtns = document.getElementById('actionBtns');
+    const titleEl    = document.getElementById('resultTitle');
+
+    section.classList.add('visible');
+
+    // Reset all sub-states
+    loadWrap.classList.remove('show');
+    errBox.classList.remove('show');
+    stickerWrap.classList.remove('show');
+    actionBtns.classList.remove('show');
+
+    if (mode === 'loading') {
+      titleEl.textContent = 'Creating your sticker… ✨';
+      loadWrap.classList.add('show');
+      section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    else if (mode === 'result') {
+      titleEl.textContent = 'Your sticker is ready! 🎉';
+      stickerWrap.classList.add('show');
+      actionBtns.classList.add('show');
+    }
+    else if (mode === 'error') {
+      titleEl.textContent = 'Oops! Something went wrong 😅';
+      errBox.textContent = `😬 ${message}`;
+      errBox.classList.add('show');
+      actionBtns.classList.add('show');
+    }
+  }
+
+  /* ─────────────── Actions ─────────────── */
+  async function downloadSticker() {
+    const img = document.getElementById('stickerImg');
+    const url = img.src;
+    const filename = `stickerdrop-${state.mood}-${state.style}-${Date.now()}.png`
+      .toLowerCase().replace(/\s+/g, '-');
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch {
+      window.open(url, '_blank');
+    }
+  }
+
+  function tryAgain() { generate(); }
+
+  function startOver() {
+    state.mood  = null;
+    state.style = null;
+    state.word  = '';
+    state.lang  = 'EN';
+
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('moodCard').classList.remove('complete');
+    document.getElementById('styleCard').classList.remove('complete');
+    document.getElementById('wordInput').value = '';
+    document.getElementById('btnEN').classList.add('active');
+    document.getElementById('btnAR').classList.remove('active');
+    document.getElementById('resultSection').classList.remove('visible');
+    document.getElementById('stickerImg').src = '';
+
+    updateBtn();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── Go ── */
+  init();
+</script>
+</body>
+</html>
