@@ -390,13 +390,7 @@
 
     .loading-text { font-weight: 800; color: var(--primary); font-size: 0.95rem; }
 
-    /* ── Sticker container with overlay ── */
-    .sticker-outer {
-      position: relative;
-      display: inline-block;
-      margin-bottom: 1.5rem;
-    }
-
+    /* ── Sticker image ── */
     .sticker-wrap { display: none; }
     .sticker-wrap.show { display: inline-block; }
 
@@ -408,55 +402,12 @@
       display: block;
       filter: drop-shadow(0 0 1px white) drop-shadow(0 0 5px rgba(0,0,0,0.2));
       animation: pop-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      margin-bottom: 1.5rem;
     }
 
     @keyframes pop-in {
       from { transform: scale(0.7); opacity: 0; }
       to   { transform: scale(1);   opacity: 1; }
-    }
-
-    /* ── Text overlay ── */
-    .text-overlay {
-      position: absolute;
-      bottom: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 88%;
-      text-align: center;
-      pointer-events: none;
-      line-height: 1.35;
-      display: none;
-    }
-    .text-overlay.show { display: block; }
-
-    .text-overlay.style-outlined {
-      font-size: 1.25rem;
-      font-weight: 900;
-      color: white;
-      -webkit-text-stroke: 2.5px #111;
-      paint-order: stroke fill;
-      text-shadow: 2px 2px 0 #111, -1px -1px 0 #111;
-    }
-
-    .text-overlay.style-retro {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #f5e6c8;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.7), 0 0 12px rgba(245,159,11,0.5);
-      letter-spacing: 0.06em;
-    }
-
-    .text-overlay.style-ios {
-      background: rgba(255,255,255,0.9);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 14px;
-      padding: 8px 16px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #1a1a1a;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.14);
-      bottom: 7%;
     }
 
     /* ── Error box ── */
@@ -614,10 +565,7 @@
     <div class="error-box" id="errorBox"></div>
 
     <div class="sticker-wrap" id="stickerWrap">
-      <div class="sticker-outer">
-        <img class="sticker-img" id="stickerImg" alt="Generated sticker">
-        <div class="text-overlay" id="textOverlay"></div>
-      </div>
+      <img class="sticker-img" id="stickerImg" alt="Generated sticker">
     </div>
 
     <div class="action-btns" id="actionBtns">
@@ -862,12 +810,16 @@
     const vibe = VIBES.find(v => v.id === state.vibe);
     const langLabel = state.lang === 'AR' ? 'Arabic' : 'English';
 
+    const messageClause = state.message.trim()
+      ? `Include the text "${state.message.trim()}" written in stylized ${langLabel} font, integrated naturally into the sticker design.`
+      : 'No text on the sticker.';
+
     const instruction =
       `You are a creative AI image prompt writer for digital stickers.\n` +
       `Generate a detailed image generation prompt for a sticker with this exact visual style:\n` +
       `${vibe.promptStyle}\n\n` +
       `Target audience language: ${langLabel}.\n` +
-      `CRITICAL: Do NOT include any text, words, letters, numbers, or typography in the image. The image should be purely visual.\n` +
+      `${messageClause}\n` +
       `The sticker must have: white background, thick bold sticker outline, centered composition, high quality.\n\n` +
       `Reply with ONLY the image generation prompt — no explanation, no markdown. Just the raw prompt text.`;
 
@@ -895,7 +847,10 @@
 
   function buildLocalPrompt() {
     const vibe = VIBES.find(v => v.id === state.vibe);
-    return `${vibe.promptStyle} No text, no letters, no words. White background, bold sticker outline, centered, high quality, crisp details.`;
+    const msgPart = state.message.trim()
+      ? `, with the text "${state.message.trim()}" stylized in the design`
+      : '';
+    return `${vibe.promptStyle}${msgPart}. White background, bold sticker outline, centered, high quality, crisp details.`;
   }
 
   /* ── AI Image Generation (core logic unchanged) ── */
@@ -944,27 +899,6 @@
     });
   }
 
-  /* ── Text overlay ── */
-  function applyTextOverlay() {
-    const overlay = document.getElementById('textOverlay');
-    const vibe = VIBES.find(v => v.id === state.vibe);
-    const message = state.message.trim();
-
-    if (!message || !vibe) {
-      overlay.classList.remove('show');
-      overlay.textContent = '';
-      return;
-    }
-
-    // Font
-    const fontFamily = state.lang === 'AR' ? `'${vibe.fontAR}', sans-serif` : "'Nunito', sans-serif";
-    overlay.style.fontFamily = fontFamily;
-    overlay.style.direction  = state.lang === 'AR' ? 'rtl' : 'ltr';
-
-    // Style class
-    overlay.className = 'text-overlay show ' + vibe.textStyleClass;
-    overlay.textContent = message;
-  }
 
   /* ─────────────── UI State Machine ─────────────── */
   function setUIState(mode, message) {
@@ -991,7 +925,6 @@
       titleEl.textContent = c.ready;
       stickerWrap.classList.add('show');
       actionBtns.classList.add('show');
-      applyTextOverlay();
     } else if (mode === 'error') {
       titleEl.textContent = c.oops;
       errBox.textContent = `😬 ${message}`;
@@ -1001,87 +934,12 @@
   }
 
   /* ─────────────── Actions ─────────────── */
-  async function downloadSticker() {
-    const img     = document.getElementById('stickerImg');
-    const message = state.message.trim();
-    const vibe    = VIBES.find(v => v.id === state.vibe);
-
-    if (!message) {
-      // No overlay — direct download
-      const a = document.createElement('a');
-      a.href = img.src;
-      a.download = `stickerdrop-${state.vibe}-${Date.now()}.png`;
-      a.click();
-      return;
-    }
-
-    // Compose image + text on canvas
-    await document.fonts.ready;
-    const canvas = document.createElement('canvas');
-    const size   = 1024;
-    canvas.width = canvas.height = size;
-    const ctx = canvas.getContext('2d');
-
-    const drawImg = new Image();
-    drawImg.onload = () => {
-      ctx.drawImage(drawImg, 0, 0, size, size);
-
-      const fontFamily = state.lang === 'AR' ? vibe.fontAR : 'Nunito';
-      const fontSize   = Math.round(size * 0.085);
-      ctx.font         = `bold ${fontSize}px ${fontFamily}`;
-      ctx.textAlign    = 'center';
-      ctx.direction    = state.lang === 'AR' ? 'rtl' : 'ltr';
-      ctx.textBaseline = 'bottom';
-
-      const x = size / 2;
-      const y = size * 0.9;
-
-      if (vibe.textStyleClass === 'style-ios') {
-        // Draw pill background
-        const tw = ctx.measureText(message).width + 48;
-        const th = fontSize + 24;
-        const bx = (size - tw) / 2;
-        const by = y - th;
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        roundRect(ctx, bx, by, tw, th, 18);
-        ctx.fillStyle = '#1a1a1a';
-        ctx.fillText(message, x, y - 8);
-      } else if (vibe.textStyleClass === 'style-retro') {
-        ctx.fillStyle   = '#f5e6c8';
-        ctx.shadowColor = 'rgba(0,0,0,0.7)';
-        ctx.shadowBlur  = 8;
-        ctx.fillText(message, x, y);
-        ctx.shadowBlur  = 0;
-      } else {
-        // Outlined style
-        ctx.lineWidth   = fontSize * 0.12;
-        ctx.strokeStyle = '#111';
-        ctx.strokeText(message, x, y);
-        ctx.fillStyle   = 'white';
-        ctx.fillText(message, x, y);
-      }
-
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
-      a.download = `stickerdrop-${state.vibe}-${Date.now()}.png`;
-      a.click();
-    };
-    drawImg.src = img.src;
-  }
-
-  function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-    ctx.fill();
+  function downloadSticker() {
+    const img = document.getElementById('stickerImg');
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = `stickerdrop-${state.vibe}-${Date.now()}.png`;
+    a.click();
   }
 
   function tryAgain() { generate(); }
@@ -1102,8 +960,6 @@
     document.getElementById('resultSection').classList.remove('visible');
     document.getElementById('stickerImg').src = '';
     document.getElementById('msgInput').value = '';
-    document.getElementById('textOverlay').className = 'text-overlay';
-    document.getElementById('textOverlay').textContent = '';
 
     // Reset to English
     document.getElementById('htmlRoot').lang = 'en';
