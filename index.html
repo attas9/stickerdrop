@@ -283,6 +283,60 @@
       line-height: 1.3;
     }
 
+    /* ── Upload reference sticker ── */
+    .upload-zone {
+      border: 2.5px dashed #D1D5DB;
+      border-radius: 20px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #FAFAFA;
+      position: relative;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .upload-zone input[type=file] {
+      position: absolute; inset: 0;
+      opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-icon  { font-size: 2.2rem; margin-bottom: 0.4rem; }
+    .upload-label {
+      font-weight: 800; font-size: 0.95rem; color: var(--primary);
+      display: block; margin-bottom: 0.25rem;
+    }
+    .upload-hint  { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; }
+
+    .upload-preview {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      background: #F9F5FF;
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+    }
+    .upload-preview.show { display: flex; }
+    .upload-thumb {
+      width: 64px; height: 64px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: var(--shadow);
+      flex-shrink: 0;
+    }
+    .upload-filename {
+      font-weight: 700; font-size: 0.88rem;
+      color: var(--text); flex: 1;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .upload-clear {
+      background: none; border: none; cursor: pointer;
+      font-size: 1.2rem; color: #DC2626; padding: 0 4px;
+      transition: transform 0.15s;
+    }
+    .upload-clear:hover { transform: scale(1.2); }
+
     /* ── Step 3: Message input ── */
     .msg-input {
       width: 100%;
@@ -545,6 +599,32 @@
     </div>
   </div>
 
+  <!-- Step 4: Upload reference (revealed after vibe) -->
+  <div class="step-reveal" id="step4Reveal">
+    <div class="step-block" id="step4Block">
+      <div class="step-header">
+        <span class="step-num">4</span>
+        <span class="step-title" id="label4">Upload a reference sticker</span>
+        <span class="optional-tag" id="optionalTag2">(optional)</span>
+      </div>
+
+      <!-- Drop zone -->
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="refInput" accept="image/*" onchange="handleUpload(event)">
+        <div class="upload-icon">🖼️</div>
+        <span class="upload-label" id="uploadLabel">Tap to upload a sticker</span>
+        <span class="upload-hint" id="uploadHint">AI will design something similar to it</span>
+      </div>
+
+      <!-- Preview once uploaded -->
+      <div class="upload-preview" id="uploadPreview">
+        <img class="upload-thumb" id="uploadThumb" alt="reference">
+        <span class="upload-filename" id="uploadFilename"></span>
+        <button class="upload-clear" onclick="clearUpload()" title="Remove">✕</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Generate (revealed after vibe) -->
   <div class="step-reveal" id="genReveal">
     <button class="generate-btn" id="generateBtn" onclick="generate()" disabled>
@@ -631,43 +711,50 @@
   /* ── UI copy (bilingual) ── */
   const COPY = {
     EN: {
-      tagline:     'AI-powered stickers, zero effort ✌️',
-      label1:      'Choose your language',
-      label2:      'Pick your vibe',
-      label3:      'Add your message',
-      optional:    '(optional)',
-      btnLabel:    'Generate Sticker',
-      loading:     'Crafting your sticker…',
-      ready:       'Your sticker is ready! 🎉',
-      oops:        'Oops! Something went wrong 😅',
-      download:    '⬇ Download',
-      again:       '🔄 Try Again',
-      reset:       '🔁 Start Over',
-      placeholder: 'Say something…',
+      tagline:      'AI-powered stickers, zero effort ✌️',
+      label1:       'Choose your language',
+      label2:       'Pick your vibe',
+      label3:       'Add your message',
+      label4:       'Upload a reference sticker',
+      optional:     '(optional)',
+      btnLabel:     'Generate Sticker',
+      loading:      'Crafting your sticker…',
+      ready:        'Your sticker is ready! 🎉',
+      oops:         'Oops! Something went wrong 😅',
+      download:     '⬇ Download',
+      again:        '🔄 Try Again',
+      reset:        '🔁 Start Over',
+      placeholder:  'Say something…',
+      uploadLabel:  'Tap to upload a sticker',
+      uploadHint:   'AI will design something similar to it',
     },
     AR: {
-      tagline:     'ستيكرات بالذكاء الاصطناعي، بدون تعب ✌️',
-      label1:      'اختر لغتك',
-      label2:      'اختر الطابع',
-      label3:      'أضف رسالتك',
-      optional:    '(اختياري)',
-      btnLabel:    'اصنع ستيكر',
-      loading:     '…يتم تصميم ستيكرك',
-      ready:       '🎉 ستيكرك جاهز',
-      oops:        '😅 !حدث خطأ ما',
-      download:    '⬇ تحميل',
-      again:       '🔄 مرة ثانية',
-      reset:       '🔁 من البداية',
-      placeholder: '…يا حبيبي',
+      tagline:      'ستيكرات بالذكاء الاصطناعي، بدون تعب ✌️',
+      label1:       'اختر لغتك',
+      label2:       'اختر الطابع',
+      label3:       'أضف رسالتك',
+      label4:       'ارفع ستيكر مرجعي',
+      optional:     '(اختياري)',
+      btnLabel:     'اصنع ستيكر',
+      loading:      '…يتم تصميم ستيكرك',
+      ready:        '🎉 ستيكرك جاهز',
+      oops:         '😅 !حدث خطأ ما',
+      download:     '⬇ تحميل',
+      again:        '🔄 مرة ثانية',
+      reset:        '🔁 من البداية',
+      placeholder:  '…يا حبيبي',
+      uploadLabel:  'اضغط لرفع ستيكر',
+      uploadHint:   'الذكاء الاصطناعي سيصمم شيئاً مشابهاً',
     },
   };
 
   /* ── State ── */
   const state = {
-    lang:   null,   // 'EN' | 'AR'
-    vibe:   null,   // vibe id string
-    message:'',
-    apiKey: localStorage.getItem('gemini_api_key') || '',
+    lang:      null,
+    vibe:      null,
+    message:   '',
+    refImage:  null,  // { base64, mimeType, filename }
+    apiKey:    localStorage.getItem('gemini_api_key') || '',
   };
 
   /* ── Boot ── */
@@ -734,17 +821,21 @@
   /* ── Apply bilingual copy ── */
   function applyCopy(lang) {
     const c = COPY[lang];
-    document.getElementById('tagline').textContent     = c.tagline;
-    document.getElementById('label1').textContent      = c.label1;
-    document.getElementById('label2').textContent      = c.label2;
-    document.getElementById('label3').textContent      = c.label3;
-    document.getElementById('optionalTag').textContent = c.optional;
-    document.getElementById('btnLabel').textContent    = c.btnLabel;
-    document.getElementById('loadingText').textContent = c.loading;
-    document.getElementById('btnDownload').textContent = c.download;
-    document.getElementById('btnAgain').textContent    = c.again;
-    document.getElementById('btnReset').textContent    = c.reset;
-    document.getElementById('msgInput').placeholder    = c.placeholder;
+    document.getElementById('tagline').textContent      = c.tagline;
+    document.getElementById('label1').textContent       = c.label1;
+    document.getElementById('label2').textContent       = c.label2;
+    document.getElementById('label3').textContent       = c.label3;
+    document.getElementById('label4').textContent       = c.label4;
+    document.getElementById('optionalTag').textContent  = c.optional;
+    document.getElementById('optionalTag2').textContent = c.optional;
+    document.getElementById('btnLabel').textContent     = c.btnLabel;
+    document.getElementById('loadingText').textContent  = c.loading;
+    document.getElementById('btnDownload').textContent  = c.download;
+    document.getElementById('btnAgain').textContent     = c.again;
+    document.getElementById('btnReset').textContent     = c.reset;
+    document.getElementById('msgInput').placeholder     = c.placeholder;
+    document.getElementById('uploadLabel').textContent  = c.uploadLabel;
+    document.getElementById('uploadHint').textContent   = c.uploadHint;
   }
 
   /* ── Vibe selection ── */
@@ -755,8 +846,9 @@
     document.getElementById('vibe_' + id).classList.add('active');
     document.getElementById('step2Block').classList.add('complete');
 
-    // Reveal step 3 and generate
+    // Reveal steps 3, 4 and generate
     revealStep('step3Reveal');
+    revealStep('step4Reveal');
     revealStep('genReveal');
 
     updateBtn();
@@ -772,6 +864,33 @@
   /* ── Update generate button ── */
   function updateBtn() {
     document.getElementById('generateBtn').disabled = !(state.lang && state.vibe);
+  }
+
+  /* ── Upload reference image ── */
+  function handleUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      const base64  = dataUrl.split(',')[1];
+      state.refImage = { base64, mimeType: file.type, filename: file.name };
+
+      document.getElementById('uploadThumb').src    = dataUrl;
+      document.getElementById('uploadFilename').textContent = file.name;
+      document.getElementById('uploadZone').style.display    = 'none';
+      document.getElementById('uploadPreview').classList.add('show');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearUpload() {
+    state.refImage = null;
+    document.getElementById('refInput').value          = '';
+    document.getElementById('uploadThumb').src         = '';
+    document.getElementById('uploadFilename').textContent = '';
+    document.getElementById('uploadPreview').classList.remove('show');
+    document.getElementById('uploadZone').style.display   = '';
   }
 
   /* ── API key management (unchanged) ── */
@@ -859,13 +978,21 @@
   async function generateImage(prompt) {
     const full = `${prompt}, ${STICKER_SUFFIX}`;
 
+    const parts = [];
+    if (state.refImage) {
+      parts.push({ inlineData: { mimeType: state.refImage.mimeType, data: state.refImage.base64 } });
+      parts.push({ text: `Using the uploaded image as a style reference, create a NEW sticker in the same visual style. ${full}` });
+    } else {
+      parts.push({ text: full });
+    }
+
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${state.apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: full }] }],
+          contents: [{ parts }],
           generationConfig: { responseModalities: ['IMAGE'] }
         })
       }
@@ -956,10 +1083,12 @@
     document.getElementById('step2Block').classList.remove('complete');
     document.getElementById('step2Reveal').classList.remove('visible');
     document.getElementById('step3Reveal').classList.remove('visible');
+    document.getElementById('step4Reveal').classList.remove('visible');
     document.getElementById('genReveal').classList.remove('visible');
     document.getElementById('resultSection').classList.remove('visible');
     document.getElementById('stickerImg').src = '';
     document.getElementById('msgInput').value = '';
+    clearUpload();
 
     // Reset to English
     document.getElementById('htmlRoot').lang = 'en';
