@@ -1055,8 +1055,12 @@
     const vibe = resolveVibe();
     const langLabel = state.lang === 'AR' ? 'Arabic' : 'English';
 
+    const arabicTextNote = state.lang === 'AR' && state.message.trim()
+      ? `CRITICAL FOR ARABIC TEXT: The text "${state.message.trim()}" must be rendered in CORRECT, PROPERLY CONNECTED Arabic script — letters must be fully joined and shaped correctly (right-to-left). Use a clean bold Arabic calligraphy or display font. Do NOT break the letters apart or render them as disconnected shapes. The Arabic text must be 100% readable and accurate.`
+      : '';
+
     const messageClause = state.message.trim()
-      ? `Include the text "${state.message.trim()}" written in stylized ${langLabel} font, integrated naturally into the sticker design.`
+      ? `Include the text "${state.message.trim()}" written in stylized ${langLabel} font, integrated naturally into the sticker design. ${arabicTextNote}`
       : 'No text on the sticker.';
 
     const iconClause = state.icon.trim()
@@ -1097,7 +1101,10 @@
 
   function buildLocalPrompt() {
     const vibe = resolveVibe();
-    const msgPart  = state.message.trim() ? `, with the text "${state.message.trim()}" stylized in the design` : '';
+    const arabicNote = state.lang === 'AR' && state.message.trim()
+      ? `. CRITICAL: render the Arabic text "${state.message.trim()}" in CORRECT fully-connected Arabic script, right-to-left, letters properly joined, using a bold Arabic display font — must be 100% readable`
+      : '';
+    const msgPart  = state.message.trim() ? `, with the text "${state.message.trim()}" stylized in the design${arabicNote}` : '';
     const iconPart = state.icon.trim()    ? `, featuring an illustrated ${state.icon.trim()} icon as a graphic element` : '';
     return `${vibe.promptStyle}${msgPart}${iconPart}. White background, bold sticker outline, centered, high quality, crisp details.`;
   }
