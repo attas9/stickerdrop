@@ -1173,28 +1173,40 @@
   /* ─────────────── Actions ─────────────── */
   async function shareToSnapchat() {
     const img = document.getElementById('stickerImg');
-    try {
-      // Convert data URL to blob
-      const res   = await fetch(img.src);
-      const blob  = await res.blob();
-      const file  = new File([blob], 'stickerdrop.png', { type: 'image/png' });
 
-      // Try native share sheet (works on mobile — user picks Snapchat)
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'My StickerDrop sticker' });
-        return;
-      }
+    // Convert data URL → Blob → File
+    const res  = await fetch(img.src);
+    const blob = await res.blob();
+    const file = new File([blob], 'stickerdrop.png', { type: 'image/png' });
 
-      // Fallback: open Snapchat Creative Kit web intent
-      const dataUrl   = img.src;
-      const stickerUrl = encodeURIComponent(dataUrl);
-      window.open(`https://www.snapchat.com/scan?attachmentUrl=${stickerUrl}`, '_blank');
-    } catch (e) {
-      if (e.name !== 'AbortError') {
-        // User dismissed share sheet — ignore
-        alert('Open Snapchat → Memories → paste the downloaded image as a sticker.');
+    // Mobile: Web Share API — opens native share sheet, user picks Snapchat
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'StickerDrop sticker' });
+      } catch (e) {
+        if (e.name !== 'AbortError') downloadSticker();
       }
+      return;
     }
+
+    // Desktop: Snapchat has no web API — download + show clear instructions
+    downloadSticker();
+    showSnapTip();
+  }
+
+  function showSnapTip() {
+    let tip = document.getElementById('snapTip');
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.id = 'snapTip';
+      tip.style.cssText = `margin-top:1rem;padding:0.85rem 1.1rem;background:#FFFBEB;border:2px solid #FFFC00;border-radius:14px;font-size:0.85rem;font-weight:700;color:#555;line-height:1.5;`;
+      document.getElementById('actionBtns').after(tip);
+    }
+    tip.style.textAlign   = state.lang === 'AR' ? 'right' : 'left';
+    tip.style.direction   = state.lang === 'AR' ? 'rtl' : 'ltr';
+    tip.innerHTML = state.lang === 'AR'
+      ? '👻 تم تحميل الستيكر! افتح سناب شات ← الذكريات ← استيراد الصورة — ثم استخدمه كستيكر في الكاميرا.'
+      : '👻 Sticker downloaded! Open Snapchat → Camera → tap the sticker icon → import from camera roll.';
   }
 
   function downloadSticker() {
