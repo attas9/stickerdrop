@@ -514,6 +514,20 @@
     .sticker-wrap { display: none; }
     .sticker-wrap.show { display: inline-block; }
 
+    .arabic-label {
+      display: none;
+      font-family: 'Amiri', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      direction: rtl;
+      color: var(--text);
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    .arabic-label.show { display: block; }
+
     .sticker-img {
       width: 280px;
       height: 280px;
@@ -755,6 +769,7 @@
     <div class="sticker-wrap" id="stickerWrap">
       <img class="sticker-img" id="stickerImg" alt="Generated sticker">
     </div>
+    <div class="arabic-label" id="arabicLabel"></div>
 
     <div class="action-btns" id="actionBtns">
       <button class="action-btn btn-snapchat" onclick="shareToSnapchat()">
@@ -1117,9 +1132,11 @@
         ? `CRITICAL FOR ARABIC TEXT: The text "${state.message.trim()}" must be rendered in CORRECT, PROPERLY CONNECTED Arabic script — letters must be fully joined and shaped correctly (right-to-left). Use a clean bold Arabic calligraphy or display font. Do NOT break the letters apart.`
         : '');
 
-    const messageClause = state.message.trim()
-      ? `Include the text "${state.message.trim()}" written in stylized ${langLabel} font, integrated naturally into the sticker design. ${arabicTextNote}`
-      : 'No text on the sticker.';
+    const messageClause = state.arabicText
+      ? 'No text on the sticker — clean art only.'
+      : (state.message.trim()
+        ? `Include the text "${state.message.trim()}" written in stylized ${langLabel} font, integrated naturally into the sticker design. ${arabicTextNote}`
+        : 'No text on the sticker.');
 
     const iconClause = state.icon.trim()
       ? `Also prominently feature a illustrated icon or shape of: ${state.icon.trim()}. Draw it as a fun graphic element integrated into the sticker composition.`
@@ -1164,7 +1181,7 @@
       : (state.lang === 'AR' && state.message.trim()
         ? `. CRITICAL: render the Arabic text "${state.message.trim()}" in CORRECT fully-connected Arabic script, right-to-left, letters properly joined, using a bold Arabic display font`
         : '');
-    const msgPart  = state.message.trim() ? `, with the text "${state.message.trim()}" stylized in the design${arabicNote}` : '';
+    const msgPart  = state.arabicText ? '' : (state.message.trim() ? `, with the text "${state.message.trim()}" stylized in the design${arabicNote}` : '');
     const iconPart = state.icon.trim()    ? `, featuring an illustrated ${state.icon.trim()} icon as a graphic element` : '';
     return `${vibe.promptStyle}${msgPart}${iconPart}. White background, bold sticker outline, centered, high quality, crisp details.`;
   }
@@ -1222,7 +1239,18 @@
   function loadImageURL(url) {
     return new Promise((resolve, reject) => {
       const img = document.getElementById('stickerImg');
-      img.onload = () => { setUIState('result'); resolve(); };
+      img.onload = () => {
+        setUIState('result');
+        const lbl = document.getElementById('arabicLabel');
+        if (state.arabicText && state.message.trim()) {
+          lbl.textContent = state.message.trim();
+          lbl.classList.add('show');
+        } else {
+          lbl.textContent = '';
+          lbl.classList.remove('show');
+        }
+        resolve();
+      };
       img.onerror = () => reject(new Error('Could not render image — try again.'));
       img.src = '';
       img.src = url;
@@ -1335,6 +1363,8 @@
     state.arabicText = false;
     document.getElementById('arabicCheckRow').classList.remove('checked');
     document.getElementById('arabicCheckBox').textContent = '';
+    document.getElementById('arabicLabel').textContent = '';
+    document.getElementById('arabicLabel').classList.remove('show');
     clearUpload();
 
     // Reset to English
