@@ -781,38 +781,22 @@
       textStyleClass: 'style-ios',
     },
     {
-      id: 'lamia-editorial',
-      emoji: '✨',
-      titleEN: "Lamia's — Dreamy Editorial",
-      titleAR: 'لميا — حالم وفني',
-      descEN: 'Album cover zine, double exposure, 35mm bloom',
-      descAR: 'غلاف ألبوم، تعريض مزدوج، بلوم فيلم',
-      promptStyle: 'High-end indie zine aesthetic sticker, soft-focus double exposure with floral botanical overlays, ethereal light leaks and iridescent pastel textures, 35mm film grain bloom, floating translucent botanical elements, elegant editorial serif typography mixed with handwritten margin scribbles, "Beautiful Mind" ethereal aura, pastel grain, soft dreamy atmosphere, white background, thick soft sticker outline.',
+      id: 'lamia',
+      emoji: '🌸',
+      titleEN: "Lamia's Style",
+      titleAR: 'ستايل لميا',
+      descEN: 'A surprise every time ✨',
+      descAR: 'مفاجأة في كل مرة ✨',
+      promptStyle: null, // resolved randomly at generation time
       fontAR: 'Amiri',
       textStyleClass: 'style-retro',
     },
-    {
-      id: 'lamia-khaleeji',
-      emoji: '🎨',
-      titleEN: "Lamia's — Khaleeji Cute",
-      titleAR: 'لميا — خليجي كيوت',
-      descEN: '3D glossy chibi, gold calligraphy, Snapchat vibes',
-      descAR: 'شخصيات ثري دي لامعة، خط ذهبي، ستايل سناب',
-      promptStyle: 'Khaleeji kawaii chibi-style character sticker, thick white sticker outline, 3D glossy clay render style with soft shadows, vibrant pastel palette, interactive cute props like a tiny coffee cup or sparkly Eid decorations, floating golden-calligraphy hearts, isometric cute perspective, high-end plastic glossy finish, sticker-pack aesthetic, white background.',
-      fontAR: 'Lalezar',
-      textStyleClass: 'style-outlined',
-    },
-    {
-      id: 'lamia-minimal',
-      emoji: '☁️',
-      titleEN: "Lamia's — Minimalist Whimsy",
-      titleAR: 'لميا — بساطة رومانسية',
-      descEN: 'Clean monoline, Pinterest pastels, airy romance',
-      descAR: 'خطوط نظيفة، ألوان بنترست، رومانسية هادئة',
-      promptStyle: 'Pinterest-perfect minimalist whimsical sticker, monoline thin consistent line illustration, plenty of negative white space, single pop of soft blush pink or sage green accent color, abstract organic shapes, simple line-art hearts, paper-cutout depth effect, Scandi-boho color palette, airy sophisticated composition, vector line art style, "less is more" romantic elegance, white background, thin clean sticker outline.',
-      fontAR: 'Amiri',
-      textStyleClass: 'style-retro',
-    },
+  ];
+
+  const LAMIA_STYLES = [
+    'High-end indie zine aesthetic sticker, soft-focus double exposure with floral botanical overlays, ethereal light leaks and iridescent pastel textures, 35mm film grain bloom, floating translucent botanical elements, elegant editorial serif typography mixed with handwritten margin scribbles, "Beautiful Mind" ethereal aura, pastel grain, soft dreamy atmosphere, white background, thick soft sticker outline.',
+    'Khaleeji kawaii chibi-style character sticker, thick white sticker outline, 3D glossy clay render style with soft shadows, vibrant pastel palette, interactive cute props like a tiny coffee cup or sparkly Eid decorations, floating golden-calligraphy hearts, isometric cute perspective, high-end plastic glossy finish, sticker-pack aesthetic, white background.',
+    'Pinterest-perfect minimalist whimsical sticker, monoline thin consistent line illustration, plenty of negative white space, single pop of soft blush pink or sage green accent color, abstract organic shapes, simple line-art hearts, paper-cutout depth effect, Scandi-boho color palette, airy sophisticated composition, vector line art style, "less is more" romantic elegance, white background, thin clean sticker outline.',
   ];
 
   /* ── UI copy (bilingual) ── */
@@ -1058,8 +1042,17 @@
     }
   }
 
-  async function buildPromptWithGemini() {
+  function resolveVibe() {
     const vibe = VIBES.find(v => v.id === state.vibe);
+    if (vibe.id === 'lamia') {
+      const pick = LAMIA_STYLES[Math.floor(Math.random() * LAMIA_STYLES.length)];
+      return { ...vibe, promptStyle: pick };
+    }
+    return vibe;
+  }
+
+  async function buildPromptWithGemini() {
+    const vibe = resolveVibe();
     const langLabel = state.lang === 'AR' ? 'Arabic' : 'English';
 
     const messageClause = state.message.trim()
@@ -1103,7 +1096,7 @@
   }
 
   function buildLocalPrompt() {
-    const vibe = VIBES.find(v => v.id === state.vibe);
+    const vibe = resolveVibe();
     const msgPart  = state.message.trim() ? `, with the text "${state.message.trim()}" stylized in the design` : '';
     const iconPart = state.icon.trim()    ? `, featuring an illustrated ${state.icon.trim()} icon as a graphic element` : '';
     return `${vibe.promptStyle}${msgPart}${iconPart}. White background, bold sticker outline, centered, high quality, crisp details.`;
