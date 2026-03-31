@@ -389,6 +389,39 @@
     .msg-input:focus { border-color: var(--primary); }
     .msg-input::placeholder { color: #D1D5DB; font-weight: 600; }
 
+    /* ── Arabic checkbox ── */
+    .arabic-check-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.75rem;
+      cursor: pointer;
+      width: fit-content;
+    }
+    .arabic-check-row input[type=checkbox] { display: none; }
+    .arabic-check-box {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 2.5px solid #E5E7EB;
+      background: white;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      font-size: 0.85rem;
+    }
+    .arabic-check-row.checked .arabic-check-box {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .arabic-check-label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      user-select: none;
+    }
+    .arabic-check-row.checked .arabic-check-label { color: var(--primary); }
+
     /* ── Generate Button ── */
     .generate-btn {
       width: 100%;
@@ -640,6 +673,11 @@
         <span class="optional-tag" id="optionalTag">(optional)</span>
       </div>
       <textarea class="msg-input" id="msgInput" rows="2" placeholder="e.g. يا حبيبي / Say Something…" maxlength="120"></textarea>
+      <label class="arabic-check-row" id="arabicCheckRow" onclick="toggleArabicCheck()">
+        <input type="checkbox" id="arabicCheck">
+        <span class="arabic-check-box" id="arabicCheckBox">✓</span>
+        <span class="arabic-check-label" id="arabicCheckLabel">My message is in Arabic</span>
+      </label>
     </div>
   </div>
 
@@ -820,6 +858,7 @@
       placeholder:  'Say something…',
       uploadLabel:  'Tap to upload a sticker',
       uploadHint:   'AI will design something similar to it',
+      arabicCheck:  'My message is in Arabic',
     },
     AR: {
       tagline:      'ستيكرات بالذكاء الاصطناعي، بدون تعب ✌️',
@@ -840,6 +879,7 @@
       placeholder:  '…يا حبيبي',
       uploadLabel:  'اضغط لرفع ستيكر',
       uploadHint:   'الذكاء الاصطناعي سيصمم شيئاً مشابهاً',
+      arabicCheck:  'رسالتي بالعربي',
     },
   };
 
@@ -851,6 +891,7 @@
     icon:       '',
     refImage:   null,
     uploadMode: null,
+    arabicText: false,
     apiKey:     localStorage.getItem('gemini_api_key') || '',
   };
 
@@ -936,8 +977,23 @@
     document.getElementById('btnAgain').textContent     = c.again;
     document.getElementById('btnReset').textContent     = c.reset;
     document.getElementById('msgInput').placeholder     = c.placeholder;
-    document.getElementById('uploadLabel').textContent  = c.uploadLabel;
-    document.getElementById('uploadHint').textContent   = c.uploadHint;
+    document.getElementById('uploadLabel').textContent    = c.uploadLabel;
+    document.getElementById('uploadHint').textContent     = c.uploadHint;
+    document.getElementById('arabicCheckLabel').textContent = c.arabicCheck;
+  }
+
+  /* ── Arabic checkbox ── */
+  function toggleArabicCheck() {
+    state.arabicText = !state.arabicText;
+    const row = document.getElementById('arabicCheckRow');
+    const box = document.getElementById('arabicCheckBox');
+    if (state.arabicText) {
+      row.classList.add('checked');
+      box.textContent = '✓';
+    } else {
+      row.classList.remove('checked');
+      box.textContent = '';
+    }
   }
 
   /* ── Vibe selection ── */
@@ -1055,9 +1111,11 @@
     const vibe = resolveVibe();
     const langLabel = state.lang === 'AR' ? 'Arabic' : 'English';
 
-    const arabicTextNote = state.lang === 'AR' && state.message.trim()
-      ? `CRITICAL FOR ARABIC TEXT: The text "${state.message.trim()}" must be rendered in CORRECT, PROPERLY CONNECTED Arabic script — letters must be fully joined and shaped correctly (right-to-left). Use a clean bold Arabic calligraphy or display font. Do NOT break the letters apart or render them as disconnected shapes. The Arabic text must be 100% readable and accurate.`
-      : '';
+    const arabicTextNote = state.arabicText && state.message.trim()
+      ? `⚠️ ABSOLUTE REQUIREMENT — ARABIC TEXT: The text "${state.message.trim()}" is in ARABIC. You MUST render it in 100% correct, fully-connected Arabic script. Every letter MUST be properly joined to adjacent letters (right-to-left). Use a bold, clear Arabic display font (like Noto Naskh Arabic or similar). DO NOT under any circumstances render the letters as disconnected, isolated, mirrored, or broken shapes. The Arabic word must be perfectly readable by a native Arabic speaker. This is non-negotiable.`
+      : (state.lang === 'AR' && state.message.trim()
+        ? `CRITICAL FOR ARABIC TEXT: The text "${state.message.trim()}" must be rendered in CORRECT, PROPERLY CONNECTED Arabic script — letters must be fully joined and shaped correctly (right-to-left). Use a clean bold Arabic calligraphy or display font. Do NOT break the letters apart.`
+        : '');
 
     const messageClause = state.message.trim()
       ? `Include the text "${state.message.trim()}" written in stylized ${langLabel} font, integrated naturally into the sticker design. ${arabicTextNote}`
@@ -1101,9 +1159,11 @@
 
   function buildLocalPrompt() {
     const vibe = resolveVibe();
-    const arabicNote = state.lang === 'AR' && state.message.trim()
-      ? `. CRITICAL: render the Arabic text "${state.message.trim()}" in CORRECT fully-connected Arabic script, right-to-left, letters properly joined, using a bold Arabic display font — must be 100% readable`
-      : '';
+    const arabicNote = state.arabicText && state.message.trim()
+      ? `. ⚠️ ABSOLUTE REQUIREMENT: render the Arabic text "${state.message.trim()}" in 100% correct fully-connected Arabic script, right-to-left, every letter properly joined, using a bold Arabic display font — must be perfectly readable by a native Arabic speaker`
+      : (state.lang === 'AR' && state.message.trim()
+        ? `. CRITICAL: render the Arabic text "${state.message.trim()}" in CORRECT fully-connected Arabic script, right-to-left, letters properly joined, using a bold Arabic display font`
+        : '');
     const msgPart  = state.message.trim() ? `, with the text "${state.message.trim()}" stylized in the design${arabicNote}` : '';
     const iconPart = state.icon.trim()    ? `, featuring an illustrated ${state.icon.trim()} icon as a graphic element` : '';
     return `${vibe.promptStyle}${msgPart}${iconPart}. White background, bold sticker outline, centered, high quality, crisp details.`;
@@ -1272,6 +1332,9 @@
     document.getElementById('msgInput').value = '';
     document.getElementById('iconInput').value = '';
     state.icon = '';
+    state.arabicText = false;
+    document.getElementById('arabicCheckRow').classList.remove('checked');
+    document.getElementById('arabicCheckBox').textContent = '';
     clearUpload();
 
     // Reset to English
