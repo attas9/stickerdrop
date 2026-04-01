@@ -639,9 +639,9 @@
 
   <!-- API Key banner (logic unchanged) -->
   <div class="api-setup" id="apiSetup">
-    <div class="api-setup-label">🔑 Gemini API Key Required</div>
+    <div class="api-setup-label">🔑 OpenRouter API Key Required</div>
     <div class="api-setup-row">
-      <input type="password" class="api-key-input" id="apiKeyInput" placeholder="Paste your Gemini API key…">
+      <input type="password" class="api-key-input" id="apiKeyInput" placeholder="Paste your OpenRouter API key…">
       <button class="api-save-btn" onclick="saveApiKey()">Save</button>
     </div>
     <p class="api-hint">Stored locally in your browser only. Get a free key at <a href="https://ai.google.dev" target="_blank">ai.google.dev</a></p>
@@ -907,7 +907,7 @@
     refImage:   null,
     uploadMode: null,
     arabicText: false,
-    apiKey:     localStorage.getItem('gemini_api_key') || '',
+    apiKey:     localStorage.getItem('openrouter_api_key') || '',
   };
 
 
@@ -1086,7 +1086,7 @@
     const val = document.getElementById('apiKeyInput').value.trim();
     if (!val) return;
     state.apiKey = val;
-    localStorage.setItem('gemini_api_key', val);
+    localStorage.setItem('openrouter_api_key', val);
     document.getElementById('apiSetup').classList.remove('visible');
   }
 
@@ -1152,24 +1152,27 @@
       `The sticker must have: white background, thick bold sticker outline, centered composition, high quality.\n\n` +
       `Reply with ONLY the image generation prompt — no explanation, no markdown. Just the raw prompt text.`;
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: instruction }] }] })
-      }
-    );
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-3.1-flash-image-preview',
+        messages: [{ role: 'user', content: instruction }],
+      })
+    });
 
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
-      const msg = errData?.error?.message || `Gemini API error (${res.status})`;
-      console.warn('Gemini text model failed, using local prompt:', msg);
+      const msg = errData?.error?.message || `OpenRouter error (${res.status})`;
+      console.warn('Text prompt failed, using local prompt:', msg);
       return buildLocalPrompt();
     }
 
     const data = await res.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    const text = data?.choices?.[0]?.message?.content?.trim();
     if (!text) return buildLocalPrompt();
     return text;
   }
@@ -1192,43 +1195,51 @@
   async function generateImage(prompt) {
     const full = `${prompt}, ${STICKER_SUFFIX}`;
 
-    const parts = [];
+    let refText = '';
     if (state.refImage && state.uploadMode === 'similar') {
-      parts.push({ inlineData: { mimeType: state.refImage.mimeType, data: state.refImage.base64 } });
-      parts.push({ text: `Using the uploaded sticker as a visual style reference, create a BRAND NEW sticker inspired by the same art style, character design, and color palette — but with original content. ${full}` });
+      refText = `Using the uploaded sticker as a visual style reference, create a BRAND NEW sticker inspired by the same art style, character design, and color palette — but with original content. ${full}`;
     } else if (state.refImage && state.uploadMode === 'enhance') {
-      parts.push({ inlineData: { mimeType: state.refImage.mimeType, data: state.refImage.base64 } });
       const textPart = state.message.trim()
         ? `Add the text "${state.message.trim()}" in a stylized font that fits the sticker's style. `
         : '';
-      parts.push({ text: `Take this exact sticker and enhance it: improve the quality, sharpen the outlines, make colors more vibrant, and make it look more polished as a die-cut sticker. ${textPart}Keep the original character/design — do not change the subject. White background, bold sticker outline.` });
-    } else {
-      parts.push({ text: full });
+      refText = `Take this exact sticker and enhance it: improve the quality, sharpen the outlines, make colors more vibrant, and make it look more polished as a die-cut sticker. ${textPart}Keep the original character/design — do not change the subject. White background, bold sticker outline.`;
     }
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${state.apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: { responseModalities: ['IMAGE'] }
-        })
-      }
-    );
+    const messages = [];
+    if (state.refImage) {
+      messages.push({ role: 'user', content: [
+        { type: 'image_url', image_url: { url: `data:${state.refImage.mimeType};base64,${state.refImage.base64}` } },
+        { type: 'text', text: refText }
+      ]});
+    } else {
+      messages.push({ role: 'user', content: full });
+    }
+
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${state.apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-3.1-flash-image-preview',
+        messages,
+        modalities: ['image', 'text'],
+      })
+    });
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `Gemini image error (${res.status})`);
+      throw new Error(err?.error?.message || `OpenRouter image error (${res.status})`);
     }
 
     const data = await res.json();
-    const part = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-    if (!part) throw new Error('Gemini returned no image — try again.');
+    const imgPart = data?.choices?.[0]?.message?.images?.[0];
+    if (!imgPart) throw new Error('No image returned — try again.');
 
-    const { mimeType, data: b64 } = part.inlineData;
-    return `data:${mimeType};base64,${b64}`;
+    const imgUrl = imgPart?.image_url?.url;
+    if (!imgUrl) throw new Error('No image URL returned — try again.');
+    return imgUrl;
   }
 
   async function renderSticker(prompt) {
