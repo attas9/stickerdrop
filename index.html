@@ -73,59 +73,6 @@
       padding: 1rem 1.25rem 5rem;
     }
 
-    /* ── API Key Setup banner (unchanged) ── */
-    .api-setup {
-      background: #FFFBEB;
-      border: 2.5px dashed var(--accent);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 1.25rem;
-      display: none;
-    }
-    .api-setup.visible { display: block; }
-
-    .api-setup-label {
-      font-family: 'Fredoka One', cursive;
-      font-size: 1.05rem;
-      color: #92400E;
-      margin-bottom: 0.7rem;
-    }
-
-    .api-setup-row {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .api-key-input {
-      flex: 1;
-      padding: 0.55rem 1rem;
-      border: 2px solid #FCD34D;
-      border-radius: 100px;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 600;
-      font-size: 0.9rem;
-      outline: none;
-      background: white;
-      transition: border-color 0.2s;
-    }
-    .api-key-input:focus { border-color: var(--accent); }
-
-    .api-save-btn {
-      padding: 0.55rem 1.2rem;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 100px;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 800;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .api-save-btn:hover { opacity: 0.88; }
-
-    .api-hint { font-size: 0.78rem; color: #92400E; margin-top: 0.45rem; }
-    .api-hint a { color: #92400E; }
 
     /* ── Step block wrapper ── */
     .step-block {
@@ -589,23 +536,6 @@
     .btn-snapchat:hover { box-shadow: 0 4px 16px rgba(255,252,0,0.5); }
 
     /* ── Settings cog ── */
-    .settings-btn {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      width: 46px; height: 46px;
-      border-radius: 50%;
-      background: white;
-      border: 2.5px solid #E5E7EB;
-      font-size: 1.2rem;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.25s;
-    }
-    .settings-btn:hover { transform: rotate(35deg); }
 
     /* ── RTL support ── */
     [dir="rtl"] .step-header { flex-direction: row-reverse; }
@@ -636,16 +566,6 @@
 </header>
 
 <div class="container">
-
-  <!-- API Key banner (logic unchanged) -->
-  <div class="api-setup" id="apiSetup">
-    <div class="api-setup-label">🔑 OpenRouter API Key Required</div>
-    <div class="api-setup-row">
-      <input type="password" class="api-key-input" id="apiKeyInput" placeholder="Paste your OpenRouter API key…">
-      <button class="api-save-btn" onclick="saveApiKey()">Save</button>
-    </div>
-    <p class="api-hint">Stored locally in your browser only. Get a free key at <a href="https://ai.google.dev" target="_blank">ai.google.dev</a></p>
-  </div>
 
   <!-- Step 1: Language -->
   <div class="step-block" id="step1Block">
@@ -784,7 +704,6 @@
 
 </div>
 
-<button class="settings-btn" onclick="toggleApiSetup()" title="API Settings">⚙️</button>
 
 <script>
   /* ── Vibe Definitions ── */
@@ -907,7 +826,6 @@
     refImage:   null,
     uploadMode: null,
     arabicText: false,
-    apiKey:     localStorage.getItem('openrouter_api_key') || '',
   };
 
 
@@ -923,7 +841,6 @@
       state.icon = e.target.value.trim();
     });
 
-    if (!state.apiKey) document.getElementById('apiSetup').classList.add('visible');
     updateBtn();
   }
 
@@ -1082,25 +999,9 @@
   }
 
   /* ── API key management (unchanged) ── */
-  function saveApiKey() {
-    const val = document.getElementById('apiKeyInput').value.trim();
-    if (!val) return;
-    state.apiKey = val;
-    localStorage.setItem('openrouter_api_key', val);
-    document.getElementById('apiSetup').classList.remove('visible');
-  }
-
-  function toggleApiSetup() {
-    document.getElementById('apiSetup').classList.toggle('visible');
-  }
-
   /* ─────────────── Generation ─────────────── */
   async function generate() {
     if (!state.lang || !state.vibe) return;
-    if (!state.apiKey) {
-      document.getElementById('apiSetup').classList.add('visible');
-      return;
-    }
 
     setUIState('loading');
 
@@ -1152,12 +1053,9 @@
       `The sticker must have: white background, thick bold sticker outline, centered composition, high quality.\n\n` +
       `Reply with ONLY the image generation prompt — no explanation, no markdown. Just the raw prompt text.`;
 
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const res = await fetch('/api/openrouter', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.apiKey}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'google/gemini-3.1-flash-image-preview',
         messages: [{ role: 'user', content: instruction }],
@@ -1215,12 +1113,9 @@
       messages.push({ role: 'user', content: full });
     }
 
-    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const res = await fetch('/api/openrouter', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${state.apiKey}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'google/gemini-3.1-flash-image-preview',
         messages,
