@@ -1200,25 +1200,53 @@
   /* ─────────────── Actions ─────────────── */
   async function shareToSnapchat() {
     const img = document.getElementById('stickerImg');
+    const snapBtn = document.getElementById('btnSnapchat');
 
-    // Convert data URL → Blob → File
-    const res  = await fetch(img.src);
-    const blob = await res.blob();
-    const file = new File([blob], 'stickerdrop.png', { type: 'image/png' });
+    // Show loading state on button
+    const origText = snapBtn.querySelector('span') ? snapBtn.querySelector('span').textContent : '';
+    snapBtn.disabled = true;
+    if (snapBtn.querySelector('span')) snapBtn.querySelector('span').textContent = '…';
 
-    // Mobile: Web Share API — opens native share sheet, user picks Snapchat
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: 'StickerDrop sticker' });
-      } catch (e) {
-        if (e.name !== 'AbortError') downloadSticker();
+    try {
+      // Extract base64 from data URL or fetch from URL
+      let base64, mimeType;
+      if (img.src.startsWith('data:')) {
+        const parts = img.src.split(',');
+        mimeType = parts[0].split(':')[1].split(';')[0];
+        base64 = parts[1];
+      } else {
+        const r = await fetch(img.src);
+        const blob = await r.blob();
+        mimeType = blob.type;
+        base64 = await new Promise(res => {
+          const reader = new FileReader();
+          reader.onload = e => res(e.target.result.split(',')[1]);
+          reader.readAsDataURL(blob);
+        });
       }
-      return;
-    }
 
-    // Desktop: Snapchat has no web API — download + show clear instructions
-    downloadSticker();
-    showSnapTip();
+      // Upload to Vercel Blob via proxy
+      const saveRes = await fetch('/api/save-sticker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64, mimeType })
+      });
+
+      if (!saveRes.ok) throw new Error('Upload failed');
+      const { url } = await saveRes.json();
+
+      // Redirect to share page with sticker URL
+      window.location.href = `/share.html?url=${encodeURIComponent(url)}`;
+
+    } catch (err) {
+      console.error('Snapchat share failed, falling back:', err);
+      // Fallback: download
+      downloadSticker();
+      showSnapTip();
+    } finally {
+      snapBtn.disabled = false;
+      if (snapBtn.querySelector('span')) snapBtn.querySelector('span').textContent = origText;
+    }
   }
 
   function showSnapTip() {
@@ -1229,8 +1257,8 @@
       tip.style.cssText = `margin-top:1rem;padding:0.85rem 1.1rem;background:#FFFBEB;border:2px solid #FFFC00;border-radius:14px;font-size:0.85rem;font-weight:700;color:#555;line-height:1.5;`;
       document.getElementById('actionBtns').after(tip);
     }
-    tip.style.textAlign   = state.lang === 'AR' ? 'right' : 'left';
-    tip.style.direction   = state.lang === 'AR' ? 'rtl' : 'ltr';
+    tip.style.textAlign = state.lang === 'AR' ? 'right' : 'left';
+    tip.style.direction = state.lang === 'AR' ? 'rtl' : 'ltr';
     tip.innerHTML = state.lang === 'AR'
       ? '👻 تم تحميل الستيكر! افتح سناب شات ← الذكريات ← استيراد الصورة — ثم استخدمه كستيكر في الكاميرا.'
       : '👻 Sticker downloaded! Open Snapchat → Camera → tap the sticker icon → import from camera roll.';
