@@ -1134,7 +1134,19 @@
 
     const imgUrl = imgPart?.image_url?.url;
     if (!imgUrl) throw new Error('No image URL returned — try again.');
-    return imgUrl;
+
+    // If it's already a data URL, return as-is
+    if (imgUrl.startsWith('data:')) return imgUrl;
+
+    // Otherwise fetch it server-side and convert to data URL to avoid CORS
+    const proxyRes = await fetch('/api/fetch-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: imgUrl })
+    });
+    if (!proxyRes.ok) return imgUrl; // fallback to direct URL
+    const { dataUrl } = await proxyRes.json();
+    return dataUrl || imgUrl;
   }
 
   async function renderSticker(prompt) {
