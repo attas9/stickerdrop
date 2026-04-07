@@ -1211,37 +1211,57 @@
 
   /* ─────────────── Actions ─────────────── */
   async function shareToSnapchat() {
-    const img = document.getElementById('stickerImg');
+    const img     = document.getElementById('stickerImg');
+    const snapBtn = document.querySelector('.btn-snapchat');
+    const origHTML = snapBtn ? snapBtn.innerHTML : '';
 
-    try {
-      // Convert image to blob — handle both data URLs and remote URLs
-      let blob;
-      if (img.src.startsWith('data:')) {
-        const parts = img.src.split(',');
-        const mime  = parts[0].match(/:(.*?);/)[1];
-        const bytes = atob(parts[1]);
-        const arr   = new Uint8Array(bytes.length);
-        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
-        blob = new Blob([arr], { type: mime });
-      } else {
-        const res = await fetch(img.src);
-        blob = await res.blob();
-      }
-
-      const file = new File([blob], 'stickerdrop.png', { type: 'image/png' });
-
-      // Mobile: Web Share API
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'StickerDrop sticker' });
-        return;
-      }
-    } catch (e) {
-      if (e.name === 'AbortError') return;
+    if (snapBtn) {
+      snapBtn.disabled = true;
+      snapBtn.innerHTML = '<span>⏳ Preparing…</span>';
     }
 
-    // Desktop / fallback
-    downloadSticker();
-    showSnapTip();
+    try {
+      // Get the sticker as base64
+      let base64, mimeType;
+      if (img.src.startsWith('data:')) {
+        const parts = img.src.split(',');
+        mimeType = parts[0].match(/:(.*?);/)[1];
+        base64   = parts[1];
+      } else {
+        // Remote URL — fetch via server proxy to bypass CORS
+        const proxyRes = await fetch('/api/fetch-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: img.src })
+        });
+        if (!proxyRes.ok) throw new Error('Image proxy failed');
+        const { dataUrl } = await proxyRes.json();
+        const parts = dataUrl.split(',');
+        mimeType = parts[0].match(/:(.*?);/)[1];
+        base64   = parts[1];
+      }
+
+      // Upload to Vercel Blob
+      const saveRes = await fetch('/api/save-sticker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64, mimeType })
+      });
+      if (!saveRes.ok) throw new Error('Upload failed');
+      const { url: blobUrl } = await saveRes.json();
+
+      // Redirect to our server-rendered share page (Snapchat crawler reads its meta tag)
+      window.location.href = `/api/share?sticker=${encodeURIComponent(blobUrl)}`;
+
+    } catch (err) {
+      console.error('Snapchat share failed, falling back:', err);
+      if (snapBtn) {
+        snapBtn.disabled  = false;
+        snapBtn.innerHTML = origHTML;
+      }
+      downloadSticker();
+      showSnapTip();
+    }
   }
 
   function showSnapTip() {
