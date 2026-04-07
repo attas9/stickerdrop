@@ -1201,21 +1201,33 @@
   async function shareToSnapchat() {
     const img = document.getElementById('stickerImg');
 
-    const res  = await fetch(img.src);
-    const blob = await res.blob();
-    const file = new File([blob], 'stickerdrop.png', { type: 'image/png' });
-
-    // Mobile: Web Share API — opens native share sheet, user picks Snapchat
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: 'StickerDrop sticker' });
-      } catch (e) {
-        if (e.name !== 'AbortError') downloadSticker();
+    try {
+      // Convert image to blob — handle both data URLs and remote URLs
+      let blob;
+      if (img.src.startsWith('data:')) {
+        const parts = img.src.split(',');
+        const mime  = parts[0].match(/:(.*?);/)[1];
+        const bytes = atob(parts[1]);
+        const arr   = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+        blob = new Blob([arr], { type: mime });
+      } else {
+        const res = await fetch(img.src);
+        blob = await res.blob();
       }
-      return;
+
+      const file = new File([blob], 'stickerdrop.png', { type: 'image/png' });
+
+      // Mobile: Web Share API
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'StickerDrop sticker' });
+        return;
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') return;
     }
 
-    // Desktop fallback: download + instructions
+    // Desktop / fallback
     downloadSticker();
     showSnapTip();
   }
