@@ -405,6 +405,20 @@
       font-weight: 800;
       color: var(--text-muted);
       letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .bg-new-badge {
+      background: linear-gradient(135deg, #EC4899 0%, #F59E0B 100%);
+      color: white;
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.62rem;
+      padding: 0.12rem 0.5rem;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 6px rgba(236,72,153,0.35);
+      animation: new-pulse 2s ease-in-out infinite;
     }
     .bg-picker-row {
       display: flex;
@@ -782,7 +796,10 @@
         <span class="arabic-check-label" id="arabicCheckLabel">My message is in Arabic</span>
       </label>
       <div class="bg-picker">
-        <div class="bg-picker-label" id="bgPickerLabel">Background</div>
+        <div class="bg-picker-label">
+          <span id="bgPickerLabel">Background</span>
+          <span class="bg-new-badge" id="bgNewBadge">NEW</span>
+        </div>
         <div class="bg-picker-row">
           <button type="button" class="bg-chip active" data-bg="white" onclick="selectBg('white')">
             <span class="bg-swatch bg-swatch-white"></span>
@@ -1163,6 +1180,7 @@
     document.getElementById('uploadHint').textContent     = c.uploadHint;
     document.getElementById('arabicCheckLabel').textContent = c.arabicCheck;
     document.getElementById('seedreamNewBadge').textContent = lang === 'AR' ? 'جديد' : 'NEW';
+    document.getElementById('bgNewBadge').textContent       = lang === 'AR' ? 'جديد' : 'NEW';
     document.getElementById('bgPickerLabel').textContent    = c.bgLabel;
     document.getElementById('bgChipWhite').textContent      = c.bgWhite;
     document.getElementById('bgChipTransparent').textContent= c.bgTransparent;
