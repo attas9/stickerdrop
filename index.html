@@ -849,6 +849,7 @@
         <div class="sticker-check">✓</div>
       </button>
       <button type="button" class="sticker-card" id="stickerCardC" onclick="selectStickerCard('c')" style="display:none">
+        <span class="vibe-new-badge" id="fluxNewBadge">NEW</span>
         <div class="sticker-card-spinner" id="stickerSpinnerC">
           <div class="mini-emoji">🎨</div>
           <div class="loading-dots"><span></span><span></span><span></span></div>
@@ -1101,7 +1102,6 @@
       }
       if (v.id === 'lamia') {
         btn.classList.add('vibe-special');
-        badges += `<span class="vibe-new-badge">${lang === 'AR' ? 'جديد' : 'NEW'}</span>`;
         badges += `<span class="vibe-special-badge">👑 ${lang === 'AR' ? 'مميز' : 'SPECIAL'}</span>`;
       }
 
@@ -1137,6 +1137,7 @@
     document.getElementById('uploadLabel').textContent    = c.uploadLabel;
     document.getElementById('uploadHint').textContent     = c.uploadHint;
     document.getElementById('seedreamNewBadge').textContent = lang === 'AR' ? 'جديد' : 'NEW';
+    document.getElementById('fluxNewBadge').textContent     = lang === 'AR' ? 'جديد' : 'NEW';
     document.getElementById('bgNewBadge').textContent       = lang === 'AR' ? 'جديد' : 'NEW';
     document.getElementById('bgPickerLabel').textContent    = c.bgLabel;
     document.getElementById('bgChipWhite').textContent      = c.bgWhite;
