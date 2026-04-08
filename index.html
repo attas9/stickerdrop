@@ -763,12 +763,49 @@
       fontAR: 'Amiri',
       textStyleClass: 'style-retro',
     },
+    {
+      id: 'romantic',
+      emoji: '💖',
+      titleEN: 'Love / Romantic',
+      titleAR: 'حب / رومانسي',
+      descEN: 'A surprise romantic vibe 💕',
+      descAR: 'رومانسية متنوعة في كل مرة 💕',
+      promptStyle: null, // resolved randomly at generation time
+      fontAR: 'Amiri',
+      textStyleClass: 'style-retro',
+    },
+    {
+      id: 'hype',
+      emoji: '💪',
+      titleEN: 'Motivational / Hype',
+      titleAR: 'تحفيزي / هايب',
+      descEN: 'Gym, morning vibes, success 🔥',
+      descAR: 'جيم، صباحيات، نجاح 🔥',
+      promptStyle: null, // resolved randomly at generation time
+      fontAR: 'Lalezar',
+      textStyleClass: 'style-outlined',
+    },
   ];
 
   const LAMIA_STYLES = [
     'High-end indie zine aesthetic sticker, soft-focus double exposure with floral botanical overlays, ethereal light leaks and iridescent pastel textures, 35mm film grain bloom, floating translucent botanical elements, elegant editorial serif typography mixed with handwritten margin scribbles, "Beautiful Mind" ethereal aura, pastel grain, soft dreamy atmosphere, fully transparent background (PNG with alpha channel, no background fill), thick soft white sticker outline.',
     'Khaleeji kawaii chibi-style character sticker, thick white sticker outline, 3D glossy clay render style with soft shadows, vibrant pastel palette, interactive cute props like a tiny coffee cup or sparkly Eid decorations, floating golden-calligraphy hearts, isometric cute perspective, high-end plastic glossy finish, sticker-pack aesthetic, fully transparent background (PNG with alpha channel, no background fill).',
     'Pinterest-perfect minimalist whimsical sticker, monoline thin consistent line illustration, single pop of soft blush pink or sage green accent color, abstract organic shapes, simple line-art hearts, paper-cutout depth effect, Scandi-boho color palette, airy sophisticated composition, vector line art style, "less is more" romantic elegance, fully transparent background (PNG with alpha channel, no background fill), thin clean white sticker outline.',
+  ];
+
+  const ROMANTIC_STYLES = [
+    'Classic Valentine sticker — bold saturated red and pink hearts, rose bouquets, cupid arrows, candy conversation hearts, love letter envelopes, glossy chubby cartoon style, high-contrast cheerful composition, die-cut sticker look, thick white sticker outline, fully transparent background (PNG with alpha channel, no background fill).',
+    'Khaleeji poetic romance sticker — elegant Arabic love calligraphy feel with gold leaf accents, oud flowers, soft red roses, traditional Middle Eastern romantic motifs, warm cream and deep red palette with gold highlights, luxurious wedding-card aesthetic, ornate decorative flourishes, thick white sticker outline, fully transparent background (PNG with alpha channel, no background fill).',
+    'Kawaii chibi couple sticker — adorable cute couple characters holding hands or hugging, 3D glossy clay render style with soft shadows, pastel pink and lavender palette, floating tiny hearts and sparkles, big eyes chibi proportions, high-end plastic glossy finish, sticker-pack aesthetic, thick white sticker outline, fully transparent background (PNG with alpha channel, no background fill).',
+    'Y2K dreamcore romance sticker — glittery holographic pink and purple gradients, butterflies, sparkles, heart-shaped sunglasses, early-2000s MySpace aesthetic, chrome metallic hearts, lens flares, Gen Z nostalgic dreamy palette, iridescent shimmer, thick white sticker outline, fully transparent background (PNG with alpha channel, no background fill).',
+    'Vintage Victorian love postcard sticker — sepia and dusty rose tones, handwritten cursive script aesthetic, pressed dried flowers, old love letter with wax seal, antique lace border feel, nostalgic romantic elegance, paper texture, delicate and refined, thick soft white sticker outline, fully transparent background (PNG with alpha channel, no background fill).',
+  ];
+
+  const HYPE_STYLES = [
+    'Gym bro hype sticker — bold flexed arm with bulging muscles, fire flames, intense "NO EXCUSES" energy, dumbbells, high-contrast black and red palette with yellow accents, comic-style bold outlines, explosive dynamic composition, aggressive motivational mood, thick white sticker outline, fully transparent background (PNG with alpha channel, no background fill).',
+    'Morning hype sticker — warm sunrise gradient (orange, yellow, pink), steaming coffee cup with heart foam, "rise & grind" energy, cozy aesthetic, soft cheerful palette, cute alarm clock, sun rays, uplifting warm mood, hand-drawn illustrated style, thick white sticker outline, fully transparent background (PNG with alpha channel, no background fill).',
+    'Success champion sticker — shiny gold trophy, royal crown, money rain and dollar signs, diamond sparkles, bold celebratory vibe, luxurious gold and black palette, confident winner energy, glossy metallic finish, dynamic burst background rays, thick white sticker outline, fully transparent background (PNG with alpha channel, no background fill).',
+    'Calm wellness hype sticker — minimalist lotus flower, soft sage green and cream palette, "breathe" mindful energy, zen composition, subtle sun and cloud elements, peaceful meditation aesthetic, clean line illustration, airy negative space, thin elegant white sticker outline, fully transparent background (PNG with alpha channel, no background fill).',
   ];
 
   /* ── UI copy (bilingual) ── */
@@ -1014,10 +1051,17 @@
     }
   }
 
+  const STYLE_POOLS = {
+    lamia:    LAMIA_STYLES,
+    romantic: ROMANTIC_STYLES,
+    hype:     HYPE_STYLES,
+  };
+
   function resolveVibe() {
     const vibe = VIBES.find(v => v.id === state.vibe);
-    if (vibe.id === 'lamia') {
-      const pick = LAMIA_STYLES[Math.floor(Math.random() * LAMIA_STYLES.length)];
+    const pool = STYLE_POOLS[vibe.id];
+    if (pool) {
+      const pick = pool[Math.floor(Math.random() * pool.length)];
       return { ...vibe, promptStyle: pick };
     }
     return vibe;
