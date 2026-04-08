@@ -1203,7 +1203,7 @@
       : '';
 
     const messageClause = state.message.trim()
-      ? `Include the text "${state.message.trim()}" written in a stylized font that matches the language of the text, integrated naturally and prominently into the sticker design.${arabicTextNote}`
+      ? `Include the EXACT text "${state.message.trim()}" written in a stylized font that matches the language of the text, integrated naturally and prominently into the sticker design. ⚠️ DO NOT TRANSLATE, transliterate, rephrase, abbreviate, or modify the text in ANY way — keep it character-for-character identical to what is inside the quotes, in the ORIGINAL language it was written in.${arabicTextNote}`
       : 'No text on the sticker.';
 
     const iconClause = state.icon.trim()
@@ -1223,6 +1223,7 @@
       `${iconClause}\n` +
       `${semanticClause}\n` +
       `The sticker must have: clean pure white background, thick bold white sticker outline, centered composition, high quality.\n\n` +
+      `⚠️ CRITICAL: If a user message is provided, pass it through verbatim into your output prompt inside double quotes. Do NOT translate, transliterate, or rewrite the user message. Keep it in its original language exactly as given.\n\n` +
       `Reply with ONLY the image generation prompt — no explanation, no markdown. Just the raw prompt text.`;
 
     const res = await fetch('/api/openrouter', {
@@ -1252,7 +1253,9 @@
     const arabicNote = state.arabicText && state.message.trim()
       ? ` (render the Arabic text in correct, fully-connected right-to-left Arabic script using a bold Arabic display font)`
       : '';
-    const msgPart  = state.message.trim() ? `, with the text "${state.message.trim()}" stylized in the design${arabicNote}` : '';
+    const msgPart  = state.message.trim()
+      ? `, with the EXACT text "${state.message.trim()}" stylized in the design (do not translate or modify the text)${arabicNote}`
+      : '';
     const iconPart = state.icon.trim() ? `, featuring an illustrated ${state.icon.trim()} icon as a graphic element` : '';
     return `${vibe.promptStyle}${msgPart}${iconPart}. Clean pure white background, bold white sticker outline, centered, high quality, crisp details.`;
   }
