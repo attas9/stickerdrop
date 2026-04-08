@@ -764,23 +764,12 @@
       textStyleClass: 'style-retro',
     },
     {
-      id: 'romantic',
-      emoji: '💖',
-      titleEN: 'Love / Romantic',
-      titleAR: 'حب / رومانسي',
-      descEN: 'A surprise romantic vibe 💕',
-      descAR: 'رومانسية متنوعة في كل مرة 💕',
-      promptStyle: null, // resolved randomly at generation time
-      fontAR: 'Amiri',
-      textStyleClass: 'style-retro',
-    },
-    {
-      id: 'hype',
-      emoji: '💪',
-      titleEN: 'Motivational / Hype',
-      titleAR: 'تحفيزي / هايب',
-      descEN: 'Gym, morning vibes, success 🔥',
-      descAR: 'جيم، صباحيات، نجاح 🔥',
+      id: 'random',
+      emoji: '🎲',
+      titleEN: 'Random',
+      titleAR: 'عشوائي',
+      descEN: 'Romance, hype, surprise mix 🎲',
+      descAR: 'رومانسية، حماس، مفاجآت 🎲',
       promptStyle: null, // resolved randomly at generation time
       fontAR: 'Lalezar',
       textStyleClass: 'style-outlined',
@@ -1052,9 +1041,8 @@
   }
 
   const STYLE_POOLS = {
-    lamia:    LAMIA_STYLES,
-    romantic: ROMANTIC_STYLES,
-    hype:     HYPE_STYLES,
+    lamia:  LAMIA_STYLES,
+    random: [...ROMANTIC_STYLES, ...HYPE_STYLES],
   };
 
   function resolveVibe() {
