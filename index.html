@@ -201,6 +201,28 @@
       gap: 0.35rem;
       text-align: center;
       box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .vibe-new-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: linear-gradient(135deg, #EC4899 0%, #F59E0B 100%);
+      color: white;
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 3px 10px rgba(236,72,153,0.4);
+      animation: new-pulse 2s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes new-pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.08); }
     }
 
     .vibe-card:hover {
@@ -879,7 +901,11 @@
       btn.className = 'vibe-card';
       btn.id = 'vibe_' + v.id;
       const lang = state.lang || 'EN';
+      const newBadge = v.id === 'random'
+        ? `<span class="vibe-new-badge">${lang === 'AR' ? 'جديد' : 'NEW'}</span>`
+        : '';
       btn.innerHTML = `
+        ${newBadge}
         <span class="vibe-emoji">${v.emoji}</span>
         <span class="vibe-title">${lang === 'AR' ? v.titleAR : v.titleEN}</span>
         <span class="vibe-desc">${lang === 'AR' ? v.descAR : v.descEN}</span>
