@@ -1330,6 +1330,11 @@
       ? `Also prominently feature a illustrated icon or shape of: ${state.icon.trim()}. Draw it as a fun graphic element integrated into the sticker composition.`
       : '';
 
+    // Random vibe: let the AI derive visual content from the message
+    const semanticClause = (state.vibe === 'random' && state.message.trim())
+      ? `SEMANTIC INTERPRETATION: Read the user's message "${state.message.trim()}" and understand its meaning, mood, and intent. Extract 1-3 key concepts, emotions, objects, or themes from it and make them the MAIN visual subject of the sticker. The sticker artwork should clearly reflect what the message is about, not just display the text. For example, if the message mentions coffee, draw a coffee cup; if it mentions love, draw romantic imagery; if it says "I'm tired", draw a sleepy character. The imagery drives the meaning — the text (if shown) is secondary.`
+      : '';
+
     const instruction =
       `You are a creative AI image prompt writer for digital stickers.\n` +
       `Generate a detailed image generation prompt for a sticker with this exact visual style:\n` +
@@ -1337,6 +1342,7 @@
       `Target audience language: ${langLabel}.\n` +
       `${messageClause}\n` +
       `${iconClause}\n` +
+      `${semanticClause}\n` +
       `The sticker must have: clean pure white background, thick bold white sticker outline, centered composition, high quality.\n\n` +
       `Reply with ONLY the image generation prompt — no explanation, no markdown. Just the raw prompt text.`;
 
