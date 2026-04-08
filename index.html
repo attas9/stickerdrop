@@ -135,53 +135,7 @@
       transform: translateY(0);
     }
 
-    /* ── Step 1: Language cards ── */
-    .lang-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .lang-card {
-      padding: 2rem 1rem;
-      border-radius: var(--radius);
-      border: 3px solid #E5E7EB;
-      background: white;
-      cursor: pointer;
-      transition: all 0.22s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      box-shadow: var(--shadow);
-    }
-
-    .lang-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-4px);
-      box-shadow: 0 10px 32px rgba(124,58,237,0.2);
-    }
-
-    .lang-card.active {
-      border-color: var(--primary);
-      background: var(--primary-light);
-      transform: translateY(-4px);
-      box-shadow: 0 10px 32px rgba(124,58,237,0.2);
-    }
-
-    .lang-flag  { font-size: 3rem; line-height: 1; }
-    .lang-label {
-      font-family: 'Fredoka One', cursive;
-      font-size: 1.3rem;
-      color: var(--primary);
-    }
-    .lang-sublabel {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      font-weight: 700;
-    }
-
-    /* ── Step 2: Vibe cards ── */
+    /* ── Vibe cards ── */
     .vibe-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -359,39 +313,6 @@
     }
     .msg-input:focus { border-color: var(--primary); }
     .msg-input::placeholder { color: #D1D5DB; font-weight: 600; }
-
-    /* ── Arabic checkbox ── */
-    .arabic-check-row {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      margin-top: 0.75rem;
-      cursor: pointer;
-      width: fit-content;
-    }
-    .arabic-check-row input[type=checkbox] { display: none; }
-    .arabic-check-box {
-      width: 22px; height: 22px;
-      border-radius: 6px;
-      border: 2.5px solid #E5E7EB;
-      background: white;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.15s;
-      flex-shrink: 0;
-      font-size: 0.85rem;
-    }
-    .arabic-check-row.checked .arabic-check-box {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
-    }
-    .arabic-check-label {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: var(--text-muted);
-      user-select: none;
-    }
-    .arabic-check-row.checked .arabic-check-label { color: var(--primary); }
 
     /* ── Background picker ── */
     .bg-picker {
@@ -716,13 +637,37 @@
     .btn-snapchat svg { width: 18px; height: 18px; flex-shrink: 0; }
     .btn-snapchat:hover { box-shadow: 0 4px 16px rgba(255,252,0,0.5); }
 
-    /* ── Settings cog ── */
+    /* ── Language toggle (top-right) ── */
+    .lang-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 100;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2.5px solid #E5E7EB;
+      background: white;
+      color: var(--primary);
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.82rem;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lang-toggle:hover {
+      transform: scale(1.06);
+      border-color: var(--primary);
+    }
+    [dir="rtl"] .lang-toggle { right: auto; left: 1rem; }
 
     /* ── RTL support ── */
     [dir="rtl"] .step-header { flex-direction: row-reverse; }
-    [dir="rtl"] .msg-input   { text-align: right; direction: rtl; }
     [dir="rtl"] .text-overlay { direction: rtl; }
-    [dir="rtl"] .lang-cards  { direction: rtl; }
     [dir="rtl"] .optional-tag { margin-left: 0; margin-right: 0.2rem; }
 
     /* ── Mobile ── */
@@ -731,9 +676,6 @@
       .sticker-card .sticker-img,
       .sticker-card-spinner { width: 220px; height: 220px; }
       .loading-wrap { width: 240px; height: 240px; }
-      .lang-card    { padding: 1.5rem 0.75rem; }
-      .lang-flag    { font-size: 2.4rem; }
-      .lang-label   { font-size: 1.1rem; }
       .vibe-card    { padding: 1.1rem 0.7rem; }
       .vibe-emoji   { font-size: 1.8rem; }
       .step-block   { padding: 1.2rem; }
@@ -741,6 +683,10 @@
   </style>
 </head>
 <body>
+
+<button class="lang-toggle" id="langToggle" onclick="toggleUiLang()" title="Toggle language">
+  <span id="langToggleLabel">AR</span>
+</button>
 
 <header>
   <div class="header-deco">✨ 🎨 ⭐</div>
@@ -750,51 +696,24 @@
 
 <div class="container">
 
-  <!-- Step 1: Language -->
-  <div class="step-block" id="step1Block">
+  <!-- Step 1: Vibe -->
+  <div class="step-block" id="step2Block">
     <div class="step-header">
       <span class="step-num">1</span>
-      <span class="step-title" id="label1">Choose your language</span>
+      <span class="step-title" id="label2">Pick your vibe</span>
     </div>
-    <div class="lang-cards">
-      <button class="lang-card" id="cardAR" onclick="selectLang('AR')">
-        <span class="lang-flag">🇸🇦</span>
-        <span class="lang-label" style="font-family:'Lalezar',sans-serif;font-size:1.5rem;">عربي</span>
-        <span class="lang-sublabel">Arabic</span>
-      </button>
-      <button class="lang-card" id="cardEN" onclick="selectLang('EN')">
-        <span class="lang-flag">🇬🇧</span>
-        <span class="lang-label">English</span>
-        <span class="lang-sublabel">إنجليزي</span>
-      </button>
-    </div>
+    <div class="vibe-grid" id="vibeGrid"></div>
   </div>
 
-  <!-- Step 2: Vibe (revealed after language) -->
-  <div class="step-reveal" id="step2Reveal">
-    <div class="step-block" id="step2Block">
-      <div class="step-header">
-        <span class="step-num">2</span>
-        <span class="step-title" id="label2">Pick your vibe</span>
-      </div>
-      <div class="vibe-grid" id="vibeGrid"></div>
-    </div>
-  </div>
-
-  <!-- Step 3: Message (revealed after vibe) -->
+  <!-- Step 2: Message (revealed after vibe) -->
   <div class="step-reveal" id="step3Reveal">
     <div class="step-block" id="step3Block">
       <div class="step-header">
-        <span class="step-num">3</span>
+        <span class="step-num">2</span>
         <span class="step-title" id="label3">Add your message</span>
         <span class="optional-tag" id="optionalTag">(optional)</span>
       </div>
       <textarea class="msg-input" id="msgInput" rows="2" placeholder="e.g. يا حبيبي / Say Something…" maxlength="120"></textarea>
-      <label class="arabic-check-row" id="arabicCheckRow" onclick="toggleArabicCheck()">
-        <input type="checkbox" id="arabicCheck">
-        <span class="arabic-check-box" id="arabicCheckBox">✓</span>
-        <span class="arabic-check-label" id="arabicCheckLabel">My message is in Arabic</span>
-      </label>
       <div class="bg-picker">
         <div class="bg-picker-label">
           <span id="bgPickerLabel">Background</span>
@@ -818,11 +737,11 @@
     </div>
   </div>
 
-  <!-- Step 4: Add icon/shape (revealed after vibe) -->
+  <!-- Step 3: Add icon/shape (revealed after vibe) -->
   <div class="step-reveal" id="step4Reveal">
     <div class="step-block">
       <div class="step-header">
-        <span class="step-num">4</span>
+        <span class="step-num">3</span>
         <span class="step-title" id="label4">Add a shape or icon</span>
         <span class="optional-tag" id="optionalTag2">(optional)</span>
       </div>
@@ -830,11 +749,11 @@
     </div>
   </div>
 
-  <!-- Step 5: Upload reference (revealed after vibe) -->
+  <!-- Step 4: Upload reference (revealed after vibe) -->
   <div class="step-reveal" id="step5Reveal">
     <div class="step-block" id="step5Block">
       <div class="step-header">
-        <span class="step-num">5</span>
+        <span class="step-num">4</span>
         <span class="step-title" id="label5">Upload a reference sticker</span>
         <span class="optional-tag" id="optionalTag3">(optional)</span>
       </div>
@@ -1022,7 +941,6 @@
   const COPY = {
     EN: {
       tagline:      'AI-powered stickers, zero effort ✌️',
-      label1:       'Choose your language',
       label2:       'Pick your vibe',
       label3:       'Add your message',
       label4:       'Add a shape or icon',
@@ -1039,7 +957,6 @@
       placeholder:  'Say something…',
       uploadLabel:  'Tap to upload a sticker',
       uploadHint:   'AI will design something similar to it',
-      arabicCheck:  'My message is in Arabic',
       bgLabel:      'Background',
       bgWhite:      'White',
       bgTransparent:'Transparent',
@@ -1047,7 +964,6 @@
     },
     AR: {
       tagline:      'ستيكرات بالذكاء الاصطناعي، بدون تعب ✌️',
-      label1:       'اختر لغتك',
       label2:       'اختر الطابع',
       label3:       'أضف رسالتك',
       label4:       'أضف شكل أو أيقونة',
@@ -1064,7 +980,6 @@
       placeholder:  '…يا حبيبي',
       uploadLabel:  'اضغط لرفع ستيكر',
       uploadHint:   'الذكاء الاصطناعي سيصمم شيئاً مشابهاً',
-      arabicCheck:  'رسالتي بالعربي',
       bgLabel:      'الخلفية',
       bgWhite:      'أبيض',
       bgTransparent:'شفاف',
@@ -1094,10 +1009,22 @@
 
   /* ── Boot ── */
   function init() {
+    // Pick initial UI language: saved preference → browser language → English
+    const saved   = localStorage.getItem('ui_lang');
+    const browser = (navigator.language || 'en').toLowerCase().startsWith('ar') ? 'AR' : 'EN';
+    const initLang = saved || browser;
+    setUiLang(initLang);
+
     renderVibeCards();
 
     document.getElementById('msgInput').addEventListener('input', e => {
-      state.message = e.target.value;
+      const val = e.target.value;
+      state.message = val;
+      // Auto-detect Arabic from message text and flip textarea direction
+      const isArabic = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(val);
+      state.arabicText = isArabic;
+      e.target.style.direction = isArabic ? 'rtl' : 'ltr';
+      e.target.style.textAlign = isArabic ? 'right' : 'left';
     });
 
     document.getElementById('iconInput').addEventListener('input', e => {
@@ -1105,6 +1032,21 @@
     });
 
     updateBtn();
+  }
+
+  /* ── UI language (header toggle) ── */
+  function setUiLang(lang) {
+    state.lang = lang;
+    localStorage.setItem('ui_lang', lang);
+    document.getElementById('htmlRoot').lang = lang === 'AR' ? 'ar' : 'en';
+    document.body.dir = lang === 'AR' ? 'rtl' : 'ltr';
+    document.getElementById('langToggleLabel').textContent = lang === 'AR' ? 'EN' : 'AR';
+    applyCopy(lang);
+    renderVibeCards();
+  }
+
+  function toggleUiLang() {
+    setUiLang(state.lang === 'AR' ? 'EN' : 'AR');
   }
 
   /* ── Render vibe cards ── */
@@ -1130,38 +1072,10 @@
     });
   }
 
-  /* ── Language selection ── */
-  function selectLang(lang) {
-    state.lang = lang;
-
-    // Card active state
-    document.getElementById('cardEN').classList.toggle('active', lang === 'EN');
-    document.getElementById('cardAR').classList.toggle('active', lang === 'AR');
-
-    // Document direction + lang
-    document.getElementById('htmlRoot').lang = lang === 'AR' ? 'ar' : 'en';
-    document.body.dir = lang === 'AR' ? 'rtl' : 'ltr';
-
-    // Update all copy
-    applyCopy(lang);
-
-    // Mark step 1 complete
-    document.getElementById('step1Block').classList.add('complete');
-
-    // Reveal step 2
-    revealStep('step2Reveal');
-
-    // Re-render vibe cards in chosen language
-    renderVibeCards();
-
-    updateBtn();
-  }
-
   /* ── Apply bilingual copy ── */
   function applyCopy(lang) {
     const c = COPY[lang];
     document.getElementById('tagline').textContent      = c.tagline;
-    document.getElementById('label1').textContent       = c.label1;
     document.getElementById('label2').textContent       = c.label2;
     document.getElementById('label3').textContent       = c.label3;
     document.getElementById('label4').textContent       = c.label4;
@@ -1178,7 +1092,6 @@
     document.getElementById('msgInput').placeholder     = c.placeholder;
     document.getElementById('uploadLabel').textContent    = c.uploadLabel;
     document.getElementById('uploadHint').textContent     = c.uploadHint;
-    document.getElementById('arabicCheckLabel').textContent = c.arabicCheck;
     document.getElementById('seedreamNewBadge').textContent = lang === 'AR' ? 'جديد' : 'NEW';
     document.getElementById('bgNewBadge').textContent       = lang === 'AR' ? 'جديد' : 'NEW';
     document.getElementById('bgPickerLabel').textContent    = c.bgLabel;
@@ -1195,20 +1108,6 @@
     });
   }
 
-  /* ── Arabic checkbox ── */
-  function toggleArabicCheck() {
-    state.arabicText = !state.arabicText;
-    const row = document.getElementById('arabicCheckRow');
-    const box = document.getElementById('arabicCheckBox');
-    if (state.arabicText) {
-      row.classList.add('checked');
-      box.textContent = '✓';
-    } else {
-      row.classList.remove('checked');
-      box.textContent = '';
-    }
-  }
-
   /* ── Vibe selection ── */
   function selectVibe(id) {
     state.vibe = id;
@@ -1217,7 +1116,7 @@
     document.getElementById('vibe_' + id).classList.add('active');
     document.getElementById('step2Block').classList.add('complete');
 
-    // Reveal steps 3, 4 and generate
+    // Reveal message, icon, upload, and generate
     revealStep('step3Reveal');
     revealStep('step4Reveal');
     revealStep('step5Reveal');
@@ -1235,7 +1134,7 @@
 
   /* ── Update generate button ── */
   function updateBtn() {
-    document.getElementById('generateBtn').disabled = !(state.lang && state.vibe);
+    document.getElementById('generateBtn').disabled = !state.vibe;
   }
 
   /* ── Upload reference image ── */
@@ -1282,7 +1181,7 @@
   /* ── API key management (unchanged) ── */
   /* ─────────────── Generation ─────────────── */
   async function generate() {
-    if (!state.lang || !state.vibe) return;
+    if (!state.vibe) return;
 
     setUIState('loading');
 
@@ -1312,18 +1211,17 @@
 
   async function buildPromptWithGemini() {
     const vibe = resolveVibe();
-    const langLabel = state.lang === 'AR' ? 'Arabic' : 'English';
 
+    // Auto-detected Arabic means: render the Arabic text as HTML overlay below,
+    // so tell the image model NOT to draw text on the sticker.
     const arabicTextNote = state.arabicText && state.message.trim()
       ? `⚠️ ABSOLUTE REQUIREMENT — ARABIC TEXT: The text "${state.message.trim()}" is in ARABIC. You MUST render it in 100% correct, fully-connected Arabic script. Every letter MUST be properly joined to adjacent letters (right-to-left). Use a bold, clear Arabic display font (like Noto Naskh Arabic or similar). DO NOT under any circumstances render the letters as disconnected, isolated, mirrored, or broken shapes. The Arabic word must be perfectly readable by a native Arabic speaker. This is non-negotiable.`
-      : (state.lang === 'AR' && state.message.trim()
-        ? `CRITICAL FOR ARABIC TEXT: The text "${state.message.trim()}" must be rendered in CORRECT, PROPERLY CONNECTED Arabic script — letters must be fully joined and shaped correctly (right-to-left). Use a clean bold Arabic calligraphy or display font. Do NOT break the letters apart.`
-        : '');
+      : '';
 
     const messageClause = state.arabicText
       ? 'No text on the sticker — clean art only.'
       : (state.message.trim()
-        ? `Include the text "${state.message.trim()}" written in stylized ${langLabel} font, integrated naturally into the sticker design. ${arabicTextNote}`
+        ? `Include the text "${state.message.trim()}" written in a stylized font that matches the language of the text, integrated naturally into the sticker design. ${arabicTextNote}`
         : 'No text on the sticker.');
 
     const iconClause = state.icon.trim()
@@ -1339,7 +1237,6 @@
       `You are a creative AI image prompt writer for digital stickers.\n` +
       `Generate a detailed image generation prompt for a sticker with this exact visual style:\n` +
       `${vibe.promptStyle}\n\n` +
-      `Target audience language: ${langLabel}.\n` +
       `${messageClause}\n` +
       `${iconClause}\n` +
       `${semanticClause}\n` +
@@ -1370,13 +1267,9 @@
 
   function buildLocalPrompt() {
     const vibe = resolveVibe();
-    const arabicNote = state.arabicText && state.message.trim()
-      ? `. ⚠️ ABSOLUTE REQUIREMENT: render the Arabic text "${state.message.trim()}" in 100% correct fully-connected Arabic script, right-to-left, every letter properly joined, using a bold Arabic display font — must be perfectly readable by a native Arabic speaker`
-      : (state.lang === 'AR' && state.message.trim()
-        ? `. CRITICAL: render the Arabic text "${state.message.trim()}" in CORRECT fully-connected Arabic script, right-to-left, letters properly joined, using a bold Arabic display font`
-        : '');
-    const msgPart  = state.arabicText ? '' : (state.message.trim() ? `, with the text "${state.message.trim()}" stylized in the design${arabicNote}` : '');
-    const iconPart = state.icon.trim()    ? `, featuring an illustrated ${state.icon.trim()} icon as a graphic element` : '';
+    // If Arabic auto-detected, we render text as HTML overlay — don't include in image prompt
+    const msgPart  = state.arabicText ? '' : (state.message.trim() ? `, with the text "${state.message.trim()}" stylized in the design` : '');
+    const iconPart = state.icon.trim() ? `, featuring an illustrated ${state.icon.trim()} icon as a graphic element` : '';
     return `${vibe.promptStyle}${msgPart}${iconPart}. Clean pure white background, bold white sticker outline, centered, high quality, crisp details.`;
   }
 
@@ -1769,40 +1662,31 @@
   function tryAgain() { generate(); }
 
   function startOver() {
-    state.lang    = null;
     state.vibe    = null;
     state.message = '';
     state.stickerA = null;
     state.stickerB = null;
     state.selectedSticker = null;
 
-    document.getElementById('cardEN').classList.remove('active');
-    document.getElementById('cardAR').classList.remove('active');
     document.querySelectorAll('.vibe-card').forEach(c => c.classList.remove('active'));
-    document.getElementById('step1Block').classList.remove('complete');
     document.getElementById('step2Block').classList.remove('complete');
-    document.getElementById('step2Reveal').classList.remove('visible');
     document.getElementById('step3Reveal').classList.remove('visible');
     document.getElementById('step4Reveal').classList.remove('visible');
     document.getElementById('step5Reveal').classList.remove('visible');
     document.getElementById('genReveal').classList.remove('visible');
     document.getElementById('resultSection').classList.remove('visible');
     resetStickerCards();
-    document.getElementById('msgInput').value = '';
+    const msgInput = document.getElementById('msgInput');
+    msgInput.value = '';
+    msgInput.style.direction = '';
+    msgInput.style.textAlign = '';
     document.getElementById('iconInput').value = '';
     state.icon = '';
     state.arabicText = false;
-    document.getElementById('arabicCheckRow').classList.remove('checked');
-    document.getElementById('arabicCheckBox').textContent = '';
     document.getElementById('arabicLabel').textContent = '';
     document.getElementById('arabicLabel').classList.remove('show');
     selectBg('white');
     clearUpload();
-
-    // Reset to English
-    document.getElementById('htmlRoot').lang = 'en';
-    document.body.dir = 'ltr';
-    applyCopy('EN');
 
     updateBtn();
     window.scrollTo({ top: 0, behavior: 'smooth' });
