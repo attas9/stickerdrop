@@ -1353,12 +1353,11 @@
   async function loadModelIntoCard(prompt, model, key) {
     const K = key.toUpperCase();
     try {
-      const rawUrl  = await generateImage(prompt, model);
-      const cleaned = await removeBgAndCrop(rawUrl);
-      // Store + load into card
-      if (key === 'a') state.stickerA = cleaned;
-      else             state.stickerB = cleaned;
-      await loadIntoCardImg(key, cleaned);
+      const url = await generateImage(prompt, model);
+      // Store + load into card (no background removal — show as-is)
+      if (key === 'a') state.stickerA = url;
+      else             state.stickerB = url;
+      await loadIntoCardImg(key, url);
     } catch (err) {
       console.warn(`Model ${model} failed:`, err);
       document.getElementById('stickerCard' + K).classList.add('failed');
