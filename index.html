@@ -206,18 +206,20 @@
 
     .vibe-new-badge {
       position: absolute;
-      top: -8px;
-      right: -8px;
+      top: -10px;
+      right: -10px;
       background: linear-gradient(135deg, #EC4899 0%, #F59E0B 100%);
       color: white;
       font-family: 'Fredoka One', cursive;
-      font-size: 0.7rem;
-      padding: 0.2rem 0.55rem;
+      font-size: 0.82rem;
+      padding: 0.28rem 0.72rem;
       border-radius: 100px;
-      letter-spacing: 0.5px;
-      box-shadow: 0 3px 10px rgba(236,72,153,0.4);
+      letter-spacing: 0.8px;
+      box-shadow: 0 4px 14px rgba(236,72,153,0.5);
       animation: new-pulse 2s ease-in-out infinite;
       pointer-events: none;
+      z-index: 10;
+      border: 2px solid white;
     }
 
     @keyframes new-pulse {
@@ -390,6 +392,59 @@
       user-select: none;
     }
     .arabic-check-row.checked .arabic-check-label { color: var(--primary); }
+
+    /* ── Background picker ── */
+    .bg-picker {
+      margin-top: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .bg-picker-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+    }
+    .bg-picker-row {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+    .bg-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.42rem 0.72rem;
+      border-radius: 100px;
+      border: 2px solid #E5E7EB;
+      background: white;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .bg-chip:hover { border-color: #D8B4FE; transform: translateY(-1px); }
+    .bg-chip.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .bg-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid #9CA3AF;
+      flex-shrink: 0;
+    }
+    .bg-swatch-white       { background: #FFFFFF; }
+    .bg-swatch-black       { background: #000000; border-color: #1F2937; }
+    .bg-swatch-transparent {
+      background: conic-gradient(#E5E7EB 25%, white 25% 50%, #E5E7EB 50% 75%, white 75%);
+      background-size: 8px 8px;
+    }
 
     /* ── Generate Button ── */
     .generate-btn {
@@ -726,6 +781,23 @@
         <span class="arabic-check-box" id="arabicCheckBox">✓</span>
         <span class="arabic-check-label" id="arabicCheckLabel">My message is in Arabic</span>
       </label>
+      <div class="bg-picker">
+        <div class="bg-picker-label" id="bgPickerLabel">Background</div>
+        <div class="bg-picker-row">
+          <button type="button" class="bg-chip active" data-bg="white" onclick="selectBg('white')">
+            <span class="bg-swatch bg-swatch-white"></span>
+            <span class="bg-chip-label" id="bgChipWhite">White</span>
+          </button>
+          <button type="button" class="bg-chip" data-bg="transparent" onclick="selectBg('transparent')">
+            <span class="bg-swatch bg-swatch-transparent"></span>
+            <span class="bg-chip-label" id="bgChipTransparent">Transparent</span>
+          </button>
+          <button type="button" class="bg-chip" data-bg="black" onclick="selectBg('black')">
+            <span class="bg-swatch bg-swatch-black"></span>
+            <span class="bg-chip-label" id="bgChipBlack">Black</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -951,6 +1023,10 @@
       uploadLabel:  'Tap to upload a sticker',
       uploadHint:   'AI will design something similar to it',
       arabicCheck:  'My message is in Arabic',
+      bgLabel:      'Background',
+      bgWhite:      'White',
+      bgTransparent:'Transparent',
+      bgBlack:      'Black',
     },
     AR: {
       tagline:      'ستيكرات بالذكاء الاصطناعي، بدون تعب ✌️',
@@ -972,6 +1048,10 @@
       uploadLabel:  'اضغط لرفع ستيكر',
       uploadHint:   'الذكاء الاصطناعي سيصمم شيئاً مشابهاً',
       arabicCheck:  'رسالتي بالعربي',
+      bgLabel:      'الخلفية',
+      bgWhite:      'أبيض',
+      bgTransparent:'شفاف',
+      bgBlack:      'أسود',
     },
   };
 
@@ -988,6 +1068,7 @@
     refImage:   null,
     uploadMode: null,
     arabicText: false,
+    bgStyle:    'white', // 'white' | 'transparent' | 'black'
     stickerA:   null,  // data URL for model A sticker
     stickerB:   null,  // data URL for model B sticker
     selectedSticker: null, // 'a' or 'b'
@@ -1082,6 +1163,18 @@
     document.getElementById('uploadHint').textContent     = c.uploadHint;
     document.getElementById('arabicCheckLabel').textContent = c.arabicCheck;
     document.getElementById('seedreamNewBadge').textContent = lang === 'AR' ? 'جديد' : 'NEW';
+    document.getElementById('bgPickerLabel').textContent    = c.bgLabel;
+    document.getElementById('bgChipWhite').textContent      = c.bgWhite;
+    document.getElementById('bgChipTransparent').textContent= c.bgTransparent;
+    document.getElementById('bgChipBlack').textContent      = c.bgBlack;
+  }
+
+  /* ── Background picker ── */
+  function selectBg(type) {
+    state.bgStyle = type;
+    document.querySelectorAll('.bg-chip').forEach(chip => {
+      chip.classList.toggle('active', chip.getAttribute('data-bg') === type);
+    });
   }
 
   /* ── Arabic checkbox ── */
@@ -1355,16 +1448,60 @@
   async function loadModelIntoCard(prompt, model, key) {
     const K = key.toUpperCase();
     try {
-      const url = await generateImage(prompt, model);
-      // Store + load into card (no background removal — show as-is)
-      if (key === 'a') state.stickerA = url;
-      else             state.stickerB = url;
-      await loadIntoCardImg(key, url);
+      const rawUrl = await generateImage(prompt, model);
+      const finalUrl = await processStickerBg(rawUrl, state.bgStyle);
+      if (key === 'a') state.stickerA = finalUrl;
+      else             state.stickerB = finalUrl;
+      await loadIntoCardImg(key, finalUrl);
     } catch (err) {
       console.warn(`Model ${model} failed:`, err);
       document.getElementById('stickerCard' + K).classList.add('failed');
       throw err;
     }
+  }
+
+  /* ── Replace white pixels with transparent, black, or keep as-is ── */
+  function processStickerBg(url, bgStyle) {
+    // White: keep as-is
+    if (bgStyle === 'white') return Promise.resolve(url);
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width  = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+
+          const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data    = imgData.data;
+          const isWhite = (r, g, b) => r > 240 && g > 240 && b > 240;
+
+          for (let i = 0; i < data.length; i += 4) {
+            if (isWhite(data[i], data[i + 1], data[i + 2])) {
+              if (bgStyle === 'transparent') {
+                data[i + 3] = 0;
+              } else if (bgStyle === 'black') {
+                data[i]     = 0;
+                data[i + 1] = 0;
+                data[i + 2] = 0;
+              }
+            }
+          }
+
+          ctx.putImageData(imgData, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        } catch (e) {
+          console.warn('Background processing failed, using original:', e);
+          resolve(url);
+        }
+      };
+      img.onerror = () => resolve(url);
+      img.src = url;
+    });
   }
 
   function loadIntoCardImg(key, url) {
@@ -1635,6 +1772,7 @@
     document.getElementById('arabicCheckBox').textContent = '';
     document.getElementById('arabicLabel').textContent = '';
     document.getElementById('arabicLabel').classList.remove('show');
+    selectBg('white');
     clearUpload();
 
     // Reset to English
