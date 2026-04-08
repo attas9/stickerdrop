@@ -814,6 +814,15 @@
         <div class="sticker-model-label">Seedream</div>
         <div class="sticker-check">✓</div>
       </button>
+      <button type="button" class="sticker-card" id="stickerCardC" onclick="selectStickerCard('c')" style="display:none">
+        <div class="sticker-card-spinner" id="stickerSpinnerC">
+          <div class="mini-emoji">🎨</div>
+          <div class="loading-dots"><span></span><span></span><span></span></div>
+        </div>
+        <img class="sticker-img" id="stickerImgC" alt="Sticker — FLUX.2 Max" style="display:none">
+        <div class="sticker-model-label">FLUX.2 Max</div>
+        <div class="sticker-check">✓</div>
+      </button>
     </div>
 
     <div class="action-btns" id="actionBtns">
@@ -975,6 +984,13 @@
   /* ── Models ── */
   const MODEL_A = 'google/gemini-3.1-flash-image-preview';
   const MODEL_B = 'bytedance-seed/seedream-4.5';
+  const MODEL_C = 'black-forest-labs/flux.2-max'; // Used only for Lamia's Style (3-model mode)
+
+  const MODEL_LABELS = {
+    a: 'Nano Banana 2',
+    b: 'Seedream',
+    c: 'FLUX.2 Max',
+  };
 
   /* ── State ── */
   const state = {
@@ -988,7 +1004,8 @@
     bgStyle:    'white', // 'white' | 'transparent' | 'black'
     stickerA:   null,  // data URL for model A sticker
     stickerB:   null,  // data URL for model B sticker
-    selectedSticker: null, // 'a' or 'b'
+    stickerC:   null,  // data URL for model C sticker (Lamia only)
+    selectedSticker: null, // 'a' | 'b' | 'c'
   };
 
 
@@ -1163,7 +1180,6 @@
     document.getElementById('modeEnhance').classList.remove('active');
   }
 
-  /* ── API key management (unchanged) ── */
   /* ─────────────── Generation ─────────────── */
   async function generate() {
     if (!state.vibe) return;
@@ -1171,8 +1187,7 @@
     setUIState('loading');
 
     try {
-      const prompt = await buildPromptWithGemini();
-      await renderSticker(prompt);
+      await renderSticker();
     } catch (err) {
       console.error(err);
       setUIState('error', err.message || 'Something went wrong — please try again.');
@@ -1194,8 +1209,13 @@
     return vibe;
   }
 
-  async function buildPromptWithGemini() {
-    const vibe = resolveVibe();
+  async function buildPromptWithGemini(forcedStyle = null) {
+    // Lamia's 3-model flow passes a specific substyle per model so no two
+    // stickers come out with the same promptStyle.
+    const baseVibe = VIBES.find(v => v.id === state.vibe);
+    const vibe = forcedStyle
+      ? { ...baseVibe, promptStyle: forcedStyle }
+      : resolveVibe();
 
     // If the message contains Arabic, strongly instruct the image model to render it correctly.
     const arabicTextNote = state.arabicText && state.message.trim()
@@ -1239,17 +1259,20 @@
       const errData = await res.json().catch(() => ({}));
       const msg = errData?.error?.message || `OpenRouter error (${res.status})`;
       console.warn('Text prompt failed, using local prompt:', msg);
-      return buildLocalPrompt();
+      return buildLocalPrompt(forcedStyle);
     }
 
     const data = await res.json();
     const text = data?.choices?.[0]?.message?.content?.trim();
-    if (!text) return buildLocalPrompt();
+    if (!text) return buildLocalPrompt(forcedStyle);
     return text;
   }
 
-  function buildLocalPrompt() {
-    const vibe = resolveVibe();
+  function buildLocalPrompt(forcedStyle = null) {
+    const baseVibe = VIBES.find(v => v.id === state.vibe);
+    const vibe = forcedStyle
+      ? { ...baseVibe, promptStyle: forcedStyle }
+      : resolveVibe();
     const arabicNote = state.arabicText && state.message.trim()
       ? ` (render the Arabic text in correct, fully-connected right-to-left Arabic script using a bold Arabic display font)`
       : '';
@@ -1322,31 +1345,54 @@
     return dataUrl || imgUrl;
   }
 
-  async function renderSticker(prompt) {
+  async function renderSticker() {
     // Reset state
     state.stickerA = null;
     state.stickerB = null;
+    state.stickerC = null;
     state.selectedSticker = null;
     resetStickerCards();
 
-    // Show the row immediately (both spinners visible) and hide the big loading wrap
+    // Show/hide third card based on vibe (Lamia = 3 cards; others = 2 cards)
+    const isLamia = state.vibe === 'lamia';
+    document.getElementById('stickerCardC').style.display = isLamia ? 'flex' : 'none';
+
+    // Show the row immediately and hide the big loading wrap
     setUIState('result');
 
-    // Fire both generations in parallel, process each independently
-    const tasks = [
-      loadModelIntoCard(prompt, MODEL_A, 'a'),
-      loadModelIntoCard(prompt, MODEL_B, 'b'),
-    ];
+    let tasks;
+    if (isLamia) {
+      // Shuffle the 3 substyles so each model gets a different one
+      const shuffled = [...LAMIA_STYLES].sort(() => Math.random() - 0.5);
+      const [promptA, promptB, promptC] = await Promise.all([
+        buildPromptWithGemini(shuffled[0]),
+        buildPromptWithGemini(shuffled[1]),
+        buildPromptWithGemini(shuffled[2]),
+      ]);
+      tasks = [
+        loadModelIntoCard(promptA, MODEL_A, 'a'),
+        loadModelIntoCard(promptB, MODEL_B, 'b'),
+        loadModelIntoCard(promptC, MODEL_C, 'c'),
+      ];
+    } else {
+      const prompt = await buildPromptWithGemini();
+      tasks = [
+        loadModelIntoCard(prompt, MODEL_A, 'a'),
+        loadModelIntoCard(prompt, MODEL_B, 'b'),
+      ];
+    }
+
     const results = await Promise.allSettled(tasks);
 
-    // If BOTH failed, throw so the caller shows an error
+    // If ALL failed, throw so the caller shows an error
     if (results.every(r => r.status === 'rejected')) {
-      throw new Error('Both models failed to generate a sticker.');
+      throw new Error('All models failed to generate a sticker.');
     }
 
     // Auto-select first successful card
     if (state.stickerA) selectStickerCard('a');
     else if (state.stickerB) selectStickerCard('b');
+    else if (state.stickerC) selectStickerCard('c');
   }
 
   async function loadModelIntoCard(prompt, model, key) {
@@ -1354,8 +1400,9 @@
     try {
       const rawUrl = await generateImage(prompt, model);
       const finalUrl = await processStickerBg(rawUrl, state.bgStyle);
-      if (key === 'a') state.stickerA = finalUrl;
-      else             state.stickerB = finalUrl;
+      if (key === 'a')      state.stickerA = finalUrl;
+      else if (key === 'b') state.stickerB = finalUrl;
+      else if (key === 'c') state.stickerC = finalUrl;
       await loadIntoCardImg(key, finalUrl);
     } catch (err) {
       console.warn(`Model ${model} failed:`, err);
@@ -1425,11 +1472,12 @@
   }
 
   function resetStickerCards() {
-    ['a', 'b'].forEach(key => {
+    ['a', 'b', 'c'].forEach(key => {
       const K = key.toUpperCase();
       const card    = document.getElementById('stickerCard' + K);
       const img     = document.getElementById('stickerImg' + K);
       const spinner = document.getElementById('stickerSpinner' + K);
+      if (!card) return;
       card.classList.remove('selected', 'failed');
       img.src = '';
       img.style.display = 'none';
@@ -1438,21 +1486,22 @@
   }
 
   function selectStickerCard(key) {
-    // Don't select a failed card
     const card = document.getElementById('stickerCard' + key.toUpperCase());
-    if (card.classList.contains('failed')) return;
-    // Don't select if no sticker loaded yet
+    if (!card || card.classList.contains('failed')) return;
     if (key === 'a' && !state.stickerA) return;
     if (key === 'b' && !state.stickerB) return;
+    if (key === 'c' && !state.stickerC) return;
 
     state.selectedSticker = key;
     document.getElementById('stickerCardA').classList.toggle('selected', key === 'a');
     document.getElementById('stickerCardB').classList.toggle('selected', key === 'b');
+    document.getElementById('stickerCardC').classList.toggle('selected', key === 'c');
   }
 
   function getSelectedStickerUrl() {
     if (state.selectedSticker === 'a') return state.stickerA;
     if (state.selectedSticker === 'b') return state.stickerB;
+    if (state.selectedSticker === 'c') return state.stickerC;
     return null;
   }
 
@@ -1643,10 +1692,12 @@
     state.message = '';
     state.stickerA = null;
     state.stickerB = null;
+    state.stickerC = null;
     state.selectedSticker = null;
 
     document.querySelectorAll('.vibe-card').forEach(c => c.classList.remove('active'));
     document.getElementById('step2Block').classList.remove('complete');
+    document.getElementById('stickerCardC').style.display = 'none';
     document.getElementById('step3Reveal').classList.remove('visible');
     document.getElementById('step4Reveal').classList.remove('visible');
     document.getElementById('step5Reveal').classList.remove('visible');
