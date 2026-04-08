@@ -176,6 +176,40 @@
       border: 2px solid white;
     }
 
+    /* Lamia SPECIAL badge — gold, with crown */
+    .vibe-special-badge {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      background: linear-gradient(135deg, #FACC15 0%, #F59E0B 50%, #D97706 100%);
+      color: #78350F;
+      font-family: 'Fredoka One', cursive;
+      font-size: 0.72rem;
+      padding: 0.26rem 0.6rem;
+      border-radius: 100px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 14px rgba(217,119,6,0.55);
+      animation: new-pulse 2.4s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 10;
+      border: 2px solid white;
+      display: flex;
+      align-items: center;
+      gap: 0.22rem;
+    }
+    /* Lamia card: gold-tinted border to hint its specialness */
+    .vibe-card.vibe-special {
+      border-color: #FCD34D;
+      background: linear-gradient(145deg, #FFFBEB 0%, #FEF3C7 100%);
+    }
+    .vibe-card.vibe-special:hover,
+    .vibe-card.vibe-special.active {
+      border-color: #F59E0B;
+      box-shadow: 0 10px 32px rgba(245,158,11,0.28);
+    }
+    [dir="rtl"] .vibe-special-badge { left: auto; right: -10px; }
+    [dir="rtl"] .vibe-new-badge     { right: auto; left: -10px; }
+
     @keyframes new-pulse {
       0%, 100% { transform: scale(1); }
       50%      { transform: scale(1.08); }
@@ -1060,11 +1094,19 @@
       btn.className = 'vibe-card';
       btn.id = 'vibe_' + v.id;
       const lang = state.lang || 'EN';
-      const newBadge = v.id === 'random'
-        ? `<span class="vibe-new-badge">${lang === 'AR' ? 'جديد' : 'NEW'}</span>`
-        : '';
+
+      let badges = '';
+      if (v.id === 'random') {
+        badges += `<span class="vibe-new-badge">${lang === 'AR' ? 'جديد' : 'NEW'}</span>`;
+      }
+      if (v.id === 'lamia') {
+        btn.classList.add('vibe-special');
+        badges += `<span class="vibe-new-badge">${lang === 'AR' ? 'جديد' : 'NEW'}</span>`;
+        badges += `<span class="vibe-special-badge">👑 ${lang === 'AR' ? 'مميز' : 'SPECIAL'}</span>`;
+      }
+
       btn.innerHTML = `
-        ${newBadge}
+        ${badges}
         <span class="vibe-emoji">${v.emoji}</span>
         <span class="vibe-title">${lang === 'AR' ? v.titleAR : v.titleEN}</span>
         <span class="vibe-desc">${lang === 'AR' ? v.descAR : v.descEN}</span>
