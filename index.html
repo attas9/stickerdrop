@@ -56,41 +56,92 @@
       .welcome-banner { font-size: 0.95rem; padding: 0.7rem 3.8rem; }
     }
 
-    /* ── Header ── */
+    /* ── Header (Playful Showcase) ── */
     header {
       text-align: center;
-      padding: 2.25rem 1rem 0.75rem;
+      padding: 3.5rem 1rem 1.5rem;
+      position: relative;
+      overflow: hidden;
     }
 
-    .header-deco {
-      font-size: 1.6rem;
-      display: flex;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-bottom: 0.4rem;
-      animation: float 3s ease-in-out infinite;
+    .header-content {
+      position: relative;
+      z-index: 2;
     }
 
     @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-6px); }
+      0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+      50%       { transform: translateY(-10px) rotate(var(--rot, 0deg)); }
+    }
+
+    .floating-stickers {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .float-sticker {
+      position: absolute;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.1rem;
+      border: 3px solid white;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    /* individual sticker positions, rotations, delays */
+    .float-sticker.s1 { top:  8%; left:  6%; --rot: -14deg; animation-delay: 0s;   background: linear-gradient(145deg, #FDF2F8, white); }
+    .float-sticker.s2 { top:  5%; right: 8%; --rot:  12deg; animation-delay: 0.6s; background: linear-gradient(145deg, #FEF3C7, white); }
+    .float-sticker.s3 { top: 52%; left:  2%; --rot:   8deg; animation-delay: 1.2s; background: linear-gradient(145deg, #EDE9FE, white); width: 64px; height: 64px; font-size: 1.85rem; }
+    .float-sticker.s4 { top: 58%; right: 3%; --rot: -10deg; animation-delay: 0.3s; background: linear-gradient(145deg, #FCE7F3, white); width: 58px; height: 58px; font-size: 1.6rem; }
+    .float-sticker.s5 { top: 78%; left: 22%; --rot:  18deg; animation-delay: 0.9s; background: linear-gradient(145deg, #DCFCE7, white); width: 52px; height: 52px; font-size: 1.45rem; }
+    .float-sticker.s6 { top: 76%; right:24%; --rot:  -6deg; animation-delay: 1.5s; background: linear-gradient(145deg, #FFF7ED, white); width: 56px; height: 56px; font-size: 1.55rem; }
+
+    @media (max-width: 640px) {
+      .float-sticker.s3,
+      .float-sticker.s4 { display: none; }
+      .float-sticker.s1 { width: 56px; height: 56px; font-size: 1.65rem; top: 6%; left: 4%; }
+      .float-sticker.s2 { width: 56px; height: 56px; font-size: 1.65rem; top: 4%; right: 4%; }
+      .float-sticker.s5,
+      .float-sticker.s6 { width: 46px; height: 46px; font-size: 1.3rem; }
     }
 
     .logo {
       font-family: 'Fredoka One', cursive;
-      font-size: clamp(2.6rem, 7vw, 4rem);
-      background: linear-gradient(135deg, #7C3AED 0%, #EC4899 55%, #F59E0B 100%);
+      font-size: clamp(2.8rem, 7.5vw, 4.3rem);
+      background: linear-gradient(
+        135deg,
+        #7C3AED 0%,
+        #EC4899 35%,
+        #F59E0B 70%,
+        #7C3AED 100%
+      );
+      background-size: 200% 200%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       line-height: 1.1;
+      animation: gradient-shift 6s ease-in-out infinite;
+      letter-spacing: -0.5px;
+    }
+
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
     }
 
     .tagline {
       font-size: 1.05rem;
       color: var(--text-muted);
       font-weight: 700;
-      margin-top: 0.3rem;
+      margin-top: 0.5rem;
     }
 
     /* ── Container ── */
@@ -741,9 +792,18 @@
 </button>
 
 <header>
-  <div class="header-deco">✨ 🎨 ⭐</div>
-  <div class="logo">StickerDrop</div>
-  <div class="tagline" id="tagline">AI-powered stickers, zero effort ✌️</div>
+  <div class="floating-stickers" aria-hidden="true">
+    <div class="float-sticker s1">🌸</div>
+    <div class="float-sticker s2">✨</div>
+    <div class="float-sticker s3">💖</div>
+    <div class="float-sticker s4">🔥</div>
+    <div class="float-sticker s5">🎨</div>
+    <div class="float-sticker s6">💫</div>
+  </div>
+  <div class="header-content">
+    <div class="logo">StickerDrop</div>
+    <div class="tagline" id="tagline">AI-powered stickers, zero effort ✌️</div>
+  </div>
 </header>
 
 <div class="container">
