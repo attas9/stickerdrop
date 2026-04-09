@@ -8,53 +8,37 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=Lalezar&family=Amiri:wght@400;700&family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary:       #0F766E;       /* deep teal */
-      --primary-dark:  #115E59;
-      --primary-light: #CCFBF1;
-      --accent:        #D4A574;       /* warm gold */
-      --accent-dark:   #B7873B;
-      --accent2:       #B91C1C;       /* burnt red */
-      --accent3:       #C2410C;       /* burnt orange */
-      --text:          #3F2A1D;       /* deep brown */
-      --text-muted:    #78716C;
+      --primary:       #7C3AED;
+      --primary-light: #EDE9FE;
+      --accent:        #F59E0B;
+      --accent2:       #EC4899;
+      --accent3:       #10B981;
+      --text:          #1F2937;
+      --text-muted:    #6B7280;
       --white:         #FFFFFF;
-      --cream:         #FFF8E7;
-      --cream-dark:    #FDEBC2;
-      --ink:           #1C1917;
-      --shadow:        0 6px 20px rgba(120, 53, 15, 0.12);
-      --shadow-lg:     0 14px 36px rgba(120, 53, 15, 0.18);
-      --radius:        20px;
+      --shadow:        0 4px 24px rgba(0,0,0,0.09);
+      --radius:        24px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: 'Nunito', sans-serif;
-      background: var(--cream);
-      background-image:
-        /* soft warm glow */
-        radial-gradient(at 0% 0%, rgba(212, 165, 116, 0.22) 0px, transparent 40%),
-        radial-gradient(at 100% 0%, rgba(15, 118, 110, 0.10) 0px, transparent 45%),
-        radial-gradient(at 50% 100%, rgba(185, 28, 28, 0.08) 0px, transparent 45%),
-        /* ornate 8-point star pattern */
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'><g fill='none' stroke='%23B7873B' stroke-width='0.8' opacity='0.16'><polygon points='30,6 36,18 48,18 38,26 42,38 30,30 18,38 22,26 12,18 24,18'/><circle cx='30' cy='30' r='2' fill='%23B7873B' stroke='none' opacity='0.4'/></g></svg>");
-      background-repeat: repeat;
-      background-attachment: fixed;
+      background: linear-gradient(145deg, #FFF0FA 0%, #F0EEFF 40%, #FFF8E7 100%);
       min-height: 100vh;
       color: var(--text);
-      position: relative;
     }
 
     /* ── Welcome banner ── */
     .welcome-banner {
-      background: linear-gradient(90deg, #FEF4D6 0%, #FEF9E6 50%, #FEF4D6 100%);
-      padding: 1rem 4.5rem;
+      background: linear-gradient(90deg, #FCE7F3 0%, #F3E8FF 50%, #FEF3C7 100%);
+      padding: 0.95rem 4.5rem;
       text-align: center;
-      border-bottom: 3px double var(--accent);
-      font-family: 'Amiri', 'Almarai', serif;
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: var(--primary-dark);
+      border-bottom: 2px solid rgba(124,58,237,0.12);
+      font-family: 'Almarai', 'Tajawal', 'Cairo', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #5B21B6;
       direction: rtl;
       letter-spacing: 0.2px;
       display: flex;
@@ -62,14 +46,6 @@
       justify-content: center;
       gap: 0.5rem;
       flex-wrap: wrap;
-      position: relative;
-    }
-    .welcome-banner::before,
-    .welcome-banner::after {
-      content: '✦';
-      color: var(--accent-dark);
-      font-size: 0.95rem;
-      opacity: 0.75;
     }
     .welcome-banner .smiley {
       font-size: 1.35rem;
@@ -80,73 +56,93 @@
       .welcome-banner { font-size: 0.95rem; padding: 0.7rem 3.8rem; }
     }
 
-    /* ── Header (Khaleeji Warm) ── */
+    /* ── Header (Playful Showcase) ── */
     header {
       text-align: center;
-      padding: 3.5rem 1rem 2rem;
+      padding: 3.5rem 1rem 1.5rem;
       position: relative;
+      overflow: hidden;
     }
 
     .header-content {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.6rem;
+      position: relative;
+      z-index: 2;
     }
 
-    /* Ornamental divider above logo */
-    .header-content::before {
-      content: '✦  ❁  ✦';
-      font-size: 1rem;
-      color: var(--accent-dark);
-      letter-spacing: 0.8rem;
-      margin-bottom: 0.3rem;
-      opacity: 0.8;
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+      50%       { transform: translateY(-10px) rotate(var(--rot, 0deg)); }
+    }
+
+    .floating-stickers {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .float-sticker {
+      position: absolute;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 6px 22px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.1rem;
+      border: 3px solid white;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    /* individual sticker positions, rotations, delays */
+    .float-sticker.s1 { top:  8%; left:  6%; --rot: -14deg; animation-delay: 0s;   background: linear-gradient(145deg, #FDF2F8, white); }
+    .float-sticker.s2 { top:  5%; right: 8%; --rot:  12deg; animation-delay: 0.6s; background: linear-gradient(145deg, #FEF3C7, white); }
+    .float-sticker.s3 { top: 52%; left:  2%; --rot:   8deg; animation-delay: 1.2s; background: linear-gradient(145deg, #EDE9FE, white); width: 64px; height: 64px; font-size: 1.85rem; }
+    .float-sticker.s4 { top: 58%; right: 3%; --rot: -10deg; animation-delay: 0.3s; background: linear-gradient(145deg, #FCE7F3, white); width: 58px; height: 58px; font-size: 1.6rem; }
+    .float-sticker.s5 { top: 78%; left: 22%; --rot:  18deg; animation-delay: 0.9s; background: linear-gradient(145deg, #DCFCE7, white); width: 52px; height: 52px; font-size: 1.45rem; }
+    .float-sticker.s6 { top: 76%; right:24%; --rot:  -6deg; animation-delay: 1.5s; background: linear-gradient(145deg, #FFF7ED, white); width: 56px; height: 56px; font-size: 1.55rem; }
+
+    @media (max-width: 640px) {
+      .float-sticker.s3,
+      .float-sticker.s4 { display: none; }
+      .float-sticker.s1 { width: 56px; height: 56px; font-size: 1.65rem; top: 6%; left: 4%; }
+      .float-sticker.s2 { width: 56px; height: 56px; font-size: 1.65rem; top: 4%; right: 4%; }
+      .float-sticker.s5,
+      .float-sticker.s6 { width: 46px; height: 46px; font-size: 1.3rem; }
     }
 
     .logo {
       font-family: 'Fredoka One', cursive;
-      font-size: clamp(2.9rem, 7.8vw, 4.5rem);
+      font-size: clamp(2.8rem, 7.5vw, 4.3rem);
       background: linear-gradient(
         135deg,
-        #B91C1C 0%,
-        #C2410C 35%,
-        #D4A574 70%,
-        #B7873B 100%
+        #7C3AED 0%,
+        #EC4899 35%,
+        #F59E0B 70%,
+        #7C3AED 100%
       );
+      background-size: 200% 200%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      line-height: 1;
+      line-height: 1.1;
+      animation: gradient-shift 6s ease-in-out infinite;
       letter-spacing: -0.5px;
-      filter: drop-shadow(0 4px 18px rgba(183, 135, 59, 0.35));
     }
 
-    /* Subtitle in Arabic — under the logo */
-    .logo-sub-ar {
-      font-family: 'Amiri', serif;
-      font-size: 1.1rem;
-      color: var(--primary-dark);
-      font-weight: 700;
-      margin-top: -0.1rem;
+    @keyframes gradient-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50%      { background-position: 100% 50%; }
     }
 
     .tagline {
-      font-size: 0.95rem;
-      color: var(--text);
+      font-size: 1.05rem;
+      color: var(--text-muted);
       font-weight: 700;
-      background: var(--white);
-      border: 2px solid var(--accent);
-      border-radius: 100px;
-      padding: 0.4rem 1.1rem;
-      display: inline-block;
-      letter-spacing: 0.2px;
-      box-shadow: var(--shadow);
-      margin-top: 0.4rem;
+      margin-top: 0.5rem;
     }
-
-    .floating-stickers,
-    .float-sticker { display: none; }
 
     /* ── Container ── */
     .container {
@@ -156,39 +152,17 @@
     }
 
 
-    /* ── Step block wrapper (Khaleeji Warm) ── */
+    /* ── Step block wrapper ── */
     .step-block {
       background: var(--white);
       border-radius: var(--radius);
       padding: 1.5rem;
-      margin-bottom: 1.3rem;
+      margin-bottom: 1.1rem;
       box-shadow: var(--shadow);
-      border: 2px solid var(--accent);
-      transition: border-color 0.25s, box-shadow 0.25s;
-      position: relative;
+      border: 2.5px solid transparent;
+      transition: border-color 0.25s;
     }
-    .step-block.complete { border-color: var(--primary); }
-    /* Decorative gold corner tick */
-    .step-block::before {
-      content: '';
-      position: absolute;
-      top: 8px; right: 8px;
-      width: 14px; height: 14px;
-      border-top: 2px solid var(--accent);
-      border-right: 2px solid var(--accent);
-      border-top-right-radius: 4px;
-      opacity: 0.7;
-    }
-    .step-block::after {
-      content: '';
-      position: absolute;
-      bottom: 8px; left: 8px;
-      width: 14px; height: 14px;
-      border-bottom: 2px solid var(--accent);
-      border-left: 2px solid var(--accent);
-      border-bottom-left-radius: 4px;
-      opacity: 0.7;
-    }
+    .step-block.complete { border-color: #A7F3D0; }
 
     .step-header {
       display: flex;
@@ -198,31 +172,28 @@
     }
 
     .step-num {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: var(--cream);
-      width: 30px;
-      height: 30px;
+      background: var(--primary);
+      color: white;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       flex-shrink: 0;
       font-weight: 800;
-      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35);
-      border: 2px solid var(--accent);
     }
 
     .step-title {
       font-family: 'Fredoka One', cursive;
-      font-size: 1.15rem;
-      color: var(--primary-dark);
-      letter-spacing: 0.2px;
+      font-size: 1.1rem;
+      color: var(--primary);
     }
 
     .optional-tag {
       font-size: 0.82rem;
-      color: #6B7280;
+      color: #9CA3AF;
       font-family: 'Nunito', sans-serif;
       font-weight: 600;
       margin-left: 0.2rem;
@@ -251,20 +222,18 @@
 
     .vibe-card {
       padding: 1.35rem 0.9rem;
-      border-radius: 18px;
-      border: 2px solid var(--accent);
-      background: var(--white);
+      border-radius: var(--radius);
+      border: 3px solid #E5E7EB;
+      background: white;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.22s;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 0.35rem;
-      color: var(--text);
       text-align: center;
       box-shadow: var(--shadow);
       position: relative;
-      font-family: 'Nunito', sans-serif;
     }
 
     .vibe-new-badge {
@@ -325,23 +294,23 @@
     }
 
     .vibe-card:hover {
-      border-color: var(--primary);
+      border-color: var(--accent2);
       transform: translateY(-4px);
-      box-shadow: 0 14px 32px rgba(120, 53, 15, 0.2);
+      box-shadow: 0 10px 32px rgba(236,72,153,0.2);
     }
 
     .vibe-card.active {
-      background: var(--primary-light);
-      border-color: var(--primary);
+      border-color: var(--accent2);
+      background: #FDF2F8;
       transform: translateY(-4px);
-      box-shadow: 0 14px 32px rgba(15, 118, 110, 0.3);
+      box-shadow: 0 10px 32px rgba(236,72,153,0.2);
     }
 
     .vibe-emoji { font-size: 2.2rem; line-height: 1; }
     .vibe-title {
       font-family: 'Fredoka One', cursive;
       font-size: 0.92rem;
-      color: var(--primary-dark);
+      color: var(--primary);
       line-height: 1.2;
     }
     .vibe-desc {
@@ -353,18 +322,18 @@
 
     /* ── Upload reference sticker ── */
     .upload-zone {
-      border: 2px dashed var(--accent);
-      border-radius: 14px;
+      border: 2.5px dashed #D1D5DB;
+      border-radius: 20px;
       padding: 1.5rem 1rem;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
-      background: var(--cream);
+      background: #FAFAFA;
       position: relative;
     }
     .upload-zone:hover, .upload-zone.drag-over {
-      background: var(--cream-dark);
       border-color: var(--primary);
+      background: var(--primary-light);
     }
     .upload-zone input[type=file] {
       position: absolute; inset: 0;
@@ -372,7 +341,7 @@
     }
     .upload-icon  { font-size: 2.2rem; margin-bottom: 0.4rem; }
     .upload-label {
-      font-weight: 800; font-size: 0.95rem; color: var(--primary-dark);
+      font-weight: 800; font-size: 0.95rem; color: var(--primary);
       display: block; margin-bottom: 0.25rem;
     }
     .upload-hint  { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; }
@@ -381,8 +350,7 @@
       display: none;
       align-items: center;
       gap: 1rem;
-      background: var(--primary-light);
-      border: 2px solid var(--primary);
+      background: #F9F5FF;
       border-radius: 16px;
       padding: 0.75rem 1rem;
     }
@@ -396,7 +364,7 @@
     }
     .upload-filename {
       font-weight: 700; font-size: 0.88rem;
-      color: var(--primary-dark); flex: 1;
+      color: var(--text); flex: 1;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .upload-clear {
@@ -416,10 +384,10 @@
 
     .mode-btn {
       flex: 1;
-      padding: 0.9rem 0.5rem;
-      border-radius: 14px;
-      border: 2px solid var(--accent);
-      background: var(--white);
+      padding: 0.85rem 0.5rem;
+      border-radius: 16px;
+      border: 2.5px solid #E5E7EB;
+      background: white;
       cursor: pointer;
       transition: all 0.2s;
       display: flex;
@@ -427,63 +395,36 @@
       align-items: center;
       gap: 0.3rem;
       font-family: 'Nunito', sans-serif;
-      color: var(--text);
     }
-    .mode-btn:hover {
-      border-color: var(--primary);
-      transform: translateY(-2px);
-    }
+    .mode-btn:hover { border-color: var(--primary); transform: translateY(-2px); }
     .mode-btn.active {
-      background: var(--primary-light);
       border-color: var(--primary);
-      box-shadow: 0 6px 18px rgba(15, 118, 110, 0.25);
+      background: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(124,58,237,0.18);
     }
     .mode-btn-emoji { font-size: 1.6rem; line-height: 1; }
-    .mode-btn-title { font-weight: 800; font-size: 0.88rem; color: var(--primary-dark); }
+    .mode-btn-title { font-weight: 800; font-size: 0.88rem; color: var(--primary); }
     .mode-btn-desc  { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-align: center; line-height: 1.3; }
 
     /* ── Step 3: Message input ── */
     .msg-input {
       width: 100%;
-      padding: 0.9rem 1.1rem;
-      border: 2px solid var(--accent);
-      border-radius: 14px;
+      padding: 0.8rem 1.1rem;
+      border: 2px solid #E5E7EB;
+      border-radius: 16px;
       font-family: 'Nunito', sans-serif;
       font-weight: 700;
       font-size: 1rem;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      background: var(--cream);
+      transition: border-color 0.2s;
+      background: white;
       resize: none;
       min-height: 72px;
       color: var(--text);
     }
-    .msg-input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
-    }
-    .msg-input::placeholder { color: #A8A29E; font-weight: 600; }
-
-    /* Icon/shape input (step 3) */
-    .word-input {
-      padding: 0.8rem 1.1rem;
-      border: 2px solid var(--accent);
-      border-radius: 14px;
-      font-family: 'Nunito', sans-serif;
-      font-weight: 700;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      background: var(--cream);
-      color: var(--text);
-    }
-    .word-input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
-    }
-    .word-input::placeholder { color: #A8A29E; font-weight: 600; }
-
-    [dir="rtl"] .word-input { text-align: right; direction: rtl; }
+    .msg-input:focus { border-color: var(--primary); }
+    .msg-input::placeholder { color: #D1D5DB; font-weight: 600; }
 
     /* ── Background picker ── */
     .bg-picker {
@@ -493,9 +434,9 @@
       gap: 0.45rem;
     }
     .bg-picker-label {
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 800;
-      color: var(--primary-dark);
+      color: var(--text-muted);
       letter-spacing: 0.3px;
       display: flex;
       align-items: center;
@@ -521,10 +462,10 @@
       display: flex;
       align-items: center;
       gap: 0.35rem;
-      padding: 0.48rem 0.85rem;
+      padding: 0.42rem 0.72rem;
       border-radius: 100px;
-      border: 2px solid var(--accent);
-      background: var(--white);
+      border: 2px solid #E5E7EB;
+      background: white;
       cursor: pointer;
       font-family: 'Nunito', sans-serif;
       font-weight: 800;
@@ -532,14 +473,11 @@
       color: var(--text-muted);
       transition: all 0.2s;
     }
-    .bg-chip:hover {
-      border-color: var(--primary);
-      color: var(--primary-dark);
-    }
+    .bg-chip:hover { border-color: #D8B4FE; transform: translateY(-1px); }
     .bg-chip.active {
-      background: var(--primary-light);
       border-color: var(--primary);
-      color: var(--primary-dark);
+      background: var(--primary-light);
+      color: var(--primary);
     }
     .bg-swatch {
       width: 14px;
@@ -558,37 +496,33 @@
     /* ── Generate Button ── */
     .generate-btn {
       width: 100%;
-      padding: 1.05rem 2rem;
-      border: 2.5px solid var(--accent);
+      padding: 1rem 2rem;
+      border: none;
       border-radius: 100px;
       font-family: 'Fredoka One', cursive;
       font-size: 1.35rem;
       cursor: pointer;
-      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--accent3) 100%);
-      color: var(--cream);
-      box-shadow: 0 10px 32px rgba(15, 118, 110, 0.35);
+      background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+      color: white;
+      box-shadow: 0 6px 22px rgba(124,58,237,0.38);
       letter-spacing: 0.4px;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.2s;
       margin-bottom: 0.5rem;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.22);
     }
     .generate-btn:hover:not(:disabled) {
       transform: translateY(-3px);
-      box-shadow: 0 16px 40px rgba(15, 118, 110, 0.45);
+      box-shadow: 0 12px 30px rgba(124,58,237,0.45);
     }
-    .generate-btn:active:not(:disabled) { transform: translateY(-1px); }
+    .generate-btn:active:not(:disabled) { transform: translateY(0); }
     .generate-btn:disabled {
-      opacity: 0.5;
+      opacity: 0.35;
       cursor: not-allowed;
-      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.15);
+      box-shadow: none;
     }
 
     /* ── Result Section ── */
     .result-section {
-      background: var(--glass-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
+      background: var(--white);
       border-radius: var(--radius);
       padding: 2rem 1.5rem;
       text-align: center;
@@ -601,7 +535,7 @@
     .result-title {
       font-family: 'Fredoka One', cursive;
       font-size: 1.3rem;
-      color: var(--primary-dark);
+      color: var(--primary);
       margin-bottom: 1.25rem;
     }
 
@@ -645,7 +579,7 @@
       40%           { opacity: 1;   transform: scale(1.25); }
     }
 
-    .loading-text { font-weight: 800; color: var(--primary-dark); font-size: 0.95rem; }
+    .loading-text { font-weight: 800; color: var(--primary); font-size: 0.95rem; }
 
     /* ── Sticker row (two sticker cards) ── */
     .sticker-row {
@@ -661,12 +595,12 @@
 
     .sticker-card {
       position: relative;
-      background: var(--white);
-      border: 2px solid var(--accent);
-      border-radius: var(--radius);
+      background: white;
+      border: 3px solid #E5E7EB;
+      border-radius: 20px;
       padding: 0.75rem 0.75rem 0.55rem;
       cursor: pointer;
-      transition: all 0.25s;
+      transition: all 0.22s;
       font-family: 'Nunito', sans-serif;
       display: flex;
       flex-direction: column;
@@ -674,18 +608,16 @@
       gap: 0.4rem;
       min-width: 180px;
       box-shadow: var(--shadow);
-      color: var(--text);
     }
     .sticker-card:hover {
-      border-color: var(--primary);
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-lg);
+      transform: translateY(-3px);
+      border-color: #D8B4FE;
     }
     .sticker-card.selected {
-      background: var(--primary-light);
       border-color: var(--primary);
-      transform: translateY(-4px);
-      box-shadow: 0 14px 32px rgba(15, 118, 110, 0.3);
+      background: var(--primary-light);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(124,58,237,0.28);
     }
 
     .sticker-card .sticker-img {
@@ -702,7 +634,7 @@
       width: 180px;
       height: 180px;
       border-radius: 14px;
-      background: linear-gradient(135deg, #FEF9E6, #FDEBC2, #FEF4D6);
+      background: linear-gradient(135deg, #F3E8FF, #FCE7F3, #FEF3C7);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -718,7 +650,7 @@
     .sticker-model-label {
       font-family: 'Fredoka One', cursive;
       font-size: 0.82rem;
-      color: var(--primary-dark);
+      color: var(--primary);
       letter-spacing: 0.2px;
     }
     .sticker-card.selected .sticker-model-label { color: var(--accent2); }
@@ -727,18 +659,17 @@
       position: absolute;
       top: -10px;
       right: -10px;
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       background: var(--primary);
-      color: var(--cream);
+      color: white;
       font-weight: 900;
       font-size: 0.95rem;
       display: none;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 14px rgba(15, 118, 110, 0.45);
-      border: 2px solid var(--accent);
+      box-shadow: 0 3px 10px rgba(124,58,237,0.45);
     }
     .sticker-card.selected .sticker-check { display: flex; }
 
@@ -762,13 +693,11 @@
 
     /* ── Error box ── */
     .error-box {
-      background: rgba(248, 113, 113, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(248, 113, 113, 0.4);
+      background: #FEF2F2;
+      border: 2px solid #FECACA;
       border-radius: 12px;
       padding: 0.9rem 1.4rem;
-      color: #FCA5A5;
+      color: #DC2626;
       font-weight: 700;
       margin-bottom: 1rem;
       display: none;
@@ -780,37 +709,31 @@
     .action-btns.show { display: flex; }
 
     .action-btn {
-      padding: 0.7rem 1.25rem;
+      padding: 0.6rem 1.2rem;
       border-radius: 100px;
       font-family: 'Nunito', sans-serif;
       font-weight: 800;
       font-size: 0.92rem;
       cursor: pointer;
-      transition: all 0.2s;
-      border: 2px solid var(--accent);
-      background: var(--white);
-      color: var(--text);
-      box-shadow: 0 4px 12px rgba(120, 53, 15, 0.1);
+      transition: all 0.15s;
+      border: 2px solid transparent;
     }
-    .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(120, 53, 15, 0.18);
-    }
+    .action-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.14); }
 
-    .btn-download  { background: var(--primary); color: var(--cream); border-color: var(--primary-dark); }
-    .btn-again     { background: var(--cream-dark); color: var(--text); border-color: var(--accent); }
-    .btn-reset     { background: #FEE2E2; color: var(--accent2); border-color: var(--accent2); }
+    .btn-download  { background: var(--accent3); color: white; border-color: var(--accent3); }
+    .btn-again     { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+    .btn-reset     { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
     .btn-snapchat  {
       background: #FFFC00;
-      color: var(--ink);
+      color: #000;
+      border-color: #FFFC00;
       font-weight: 900;
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      border-color: var(--accent-dark);
     }
     .btn-snapchat svg { width: 18px; height: 18px; flex-shrink: 0; }
-    .btn-snapchat:hover { box-shadow: 0 10px 26px rgba(255, 252, 0, 0.5); }
+    .btn-snapchat:hover { box-shadow: 0 4px 16px rgba(255,252,0,0.5); }
 
     /* ── Language toggle (top-right) ── */
     .lang-toggle {
@@ -818,26 +741,25 @@
       top: 1rem;
       right: 1rem;
       z-index: 100;
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      border: 2.5px solid var(--accent);
-      background: var(--white);
-      color: var(--primary-dark);
+      border: 2.5px solid #E5E7EB;
+      background: white;
+      color: var(--primary);
       font-family: 'Fredoka One', cursive;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       letter-spacing: 0.5px;
       cursor: pointer;
-      box-shadow: 0 6px 18px rgba(120, 53, 15, 0.2);
+      box-shadow: var(--shadow);
       transition: all 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .lang-toggle:hover {
-      border-color: var(--primary);
       transform: scale(1.06);
-      box-shadow: 0 10px 26px rgba(15, 118, 110, 0.28);
+      border-color: var(--primary);
     }
     [dir="rtl"] .lang-toggle { right: auto; left: 1rem; }
 
@@ -880,7 +802,6 @@
   </div>
   <div class="header-content">
     <div class="logo">StickerDrop</div>
-    <div class="logo-sub-ar">ستيكر دروب</div>
     <div class="tagline" id="tagline">AI-powered stickers, zero effort ✌️</div>
   </div>
 </header>
