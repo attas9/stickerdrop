@@ -29,6 +29,33 @@
       color: var(--text);
     }
 
+    /* ── Welcome banner ── */
+    .welcome-banner {
+      background: linear-gradient(90deg, #FCE7F3 0%, #F3E8FF 50%, #FEF3C7 100%);
+      padding: 0.85rem 1rem;
+      text-align: center;
+      border-bottom: 2px solid rgba(124,58,237,0.12);
+      font-family: 'Amiri', 'Lalezar', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #5B21B6;
+      direction: rtl;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .welcome-banner .smiley {
+      font-size: 1.35rem;
+      animation: float 3s ease-in-out infinite;
+      display: inline-block;
+    }
+    @media (max-width: 480px) {
+      .welcome-banner { font-size: 1rem; padding: 0.7rem 0.8rem; }
+    }
+
     /* ── Header ── */
     header {
       text-align: center;
@@ -703,6 +730,11 @@
   </style>
 </head>
 <body>
+
+<div class="welcome-banner">
+  <span>يا هلا و سهلا و مسهله و مرحبا و مقربه</span>
+  <span class="smiley">😊</span>
+</div>
 
 <button class="lang-toggle" id="langToggle" onclick="toggleUiLang()" title="Toggle language">
   <span id="langToggleLabel">AR</span>
