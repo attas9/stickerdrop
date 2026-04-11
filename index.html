@@ -1008,6 +1008,18 @@
       textStyleClass: 'style-ios',
     },
     {
+      id: 'lamiaPremium',
+      emoji: '👑',
+      titleEN: 'Lamia Premium',
+      titleAR: 'لميا بريميوم',
+      descEN: 'Dreamy editorial, handpicked ✨',
+      descAR: 'تصميم حالم ومنتقى ✨',
+      promptStyle: 'High-end indie zine aesthetic sticker, soft-focus double exposure with floral botanical overlays, ethereal light leaks and iridescent pastel textures, 35mm film grain bloom, floating translucent botanical elements, elegant editorial serif typography mixed with handwritten margin scribbles, "Beautiful Mind" ethereal aura, pastel grain, soft dreamy atmosphere, clean pure white background, thick soft white sticker outline.',
+      fontAR: 'Amiri',
+      textStyleClass: 'style-retro',
+      singleModel: true, // only Nano Banana 2
+    },
+    {
       id: 'lamia',
       emoji: '🌸',
       titleEN: "Lamia's Style",
@@ -1185,6 +1197,11 @@
       let badges = '';
       if (v.id === 'random') {
         badges += `<span class="vibe-new-badge">${lang === 'AR' ? 'جديد' : 'NEW'}</span>`;
+      }
+      if (v.id === 'lamiaPremium') {
+        btn.classList.add('vibe-special');
+        badges += `<span class="vibe-new-badge">${lang === 'AR' ? 'جديد' : 'NEW'}</span>`;
+        badges += `<span class="vibe-special-badge">👑 ${lang === 'AR' ? 'بريميوم' : 'PREMIUM'}</span>`;
       }
       if (v.id === 'lamia') {
         btn.classList.add('vibe-special');
@@ -1482,8 +1499,12 @@
     state.selectedSticker = null;
     resetStickerCards();
 
-    // Show/hide third card based on vibe (Lamia = 3 cards; others = 2 cards)
+    // Determine card layout based on vibe
+    const vibeObj = VIBES.find(v => v.id === state.vibe);
     const isLamia = state.vibe === 'lamia';
+    const isSingle = vibeObj && vibeObj.singleModel;
+
+    document.getElementById('stickerCardB').style.display = isSingle ? 'none' : 'flex';
     document.getElementById('stickerCardC').style.display = isLamia ? 'flex' : 'none';
 
     // Show the row immediately and hide the big loading wrap
@@ -1502,6 +1523,12 @@
         loadModelIntoCard(promptA, MODEL_A, 'a'),
         loadModelIntoCard(promptB, MODEL_B, 'b'),
         loadModelIntoCard(promptC, MODEL_C, 'c'),
+      ];
+    } else if (isSingle) {
+      // Single model (e.g. Lamia Premium) — only Nano Banana 2
+      const prompt = await buildPromptWithGemini();
+      tasks = [
+        loadModelIntoCard(prompt, MODEL_A, 'a'),
       ];
     } else {
       const prompt = await buildPromptWithGemini();
@@ -1826,6 +1853,7 @@
 
     document.querySelectorAll('.vibe-card').forEach(c => c.classList.remove('active'));
     document.getElementById('step2Block').classList.remove('complete');
+    document.getElementById('stickerCardB').style.display = 'flex';
     document.getElementById('stickerCardC').style.display = 'none';
     document.getElementById('step3Reveal').classList.remove('visible');
     document.getElementById('step4Reveal').classList.remove('visible');
