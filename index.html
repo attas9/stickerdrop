@@ -61,6 +61,17 @@
       animation: float 3s ease-in-out infinite;
       display: inline-block;
     }
+    .welcome-sub {
+      width: 100%;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-top: 0.15rem;
+      letter-spacing: 0.3px;
+      direction: ltr;
+    }
     @media (max-width: 480px) {
       .welcome-banner { font-size: 0.95rem; padding: 0.7rem 3.8rem; }
     }
@@ -779,6 +790,7 @@
 <div class="welcome-banner">
   <span>يا هلا و سهلا و مسهله و مرحبا و مقربه</span>
   <span class="smiley">😊</span>
+  <div class="welcome-sub">Inspired by a real human. She charges per use</div>
 </div>
 
 <button class="lang-toggle" id="langToggle" onclick="toggleUiLang()" title="Toggle language">
