@@ -1385,7 +1385,7 @@
       : 'No text on the sticker.';
 
     const iconClause = state.icon.trim()
-      ? `Also prominently feature a illustrated icon or shape of: ${state.icon.trim()}. Draw it as a fun graphic element integrated into the sticker composition.`
+      ? `Also prominently feature an illustrated visual icon or shape of: ${state.icon.trim()}. DRAW it as a visual graphic illustration — do NOT write the word "${state.icon.trim()}" as text. It must be a pictorial drawing, not a text label.`
       : '';
 
     // Random vibe: let the AI derive visual content from the message
@@ -1401,7 +1401,10 @@
       `${iconClause}\n` +
       `${semanticClause}\n` +
       `The sticker must have: clean pure white background, thick bold white sticker outline, centered composition, high quality.\n\n` +
-      `⚠️ CRITICAL: If a user message is provided, pass it through verbatim into your output prompt inside double quotes. Do NOT translate, transliterate, or rewrite the user message. Keep it in its original language exactly as given.\n\n` +
+      `⚠️ CRITICAL RULES:\n` +
+      `1. If a user message is provided, pass it through verbatim into your output prompt inside double quotes. Do NOT translate, transliterate, or rewrite it.\n` +
+      `2. Do NOT add ANY extra text, words, labels, or letters beyond what the user provided. If the user gave no message, the sticker must have ZERO text on it.\n` +
+      `3. If an icon/shape is specified, it must be drawn as a VISUAL ILLUSTRATION, never written as a text word.\n\n` +
       `Reply with ONLY the image generation prompt — no explanation, no markdown. Just the raw prompt text.`;
 
     const res = await fetch('/api/openrouter', {
@@ -1437,8 +1440,9 @@
     const msgPart  = state.message.trim()
       ? `, with the EXACT text "${state.message.trim()}" stylized in the design (do not translate or modify the text)${arabicNote}`
       : '';
-    const iconPart = state.icon.trim() ? `, featuring an illustrated ${state.icon.trim()} icon as a graphic element` : '';
-    return `${vibe.promptStyle}${msgPart}${iconPart}. Clean pure white background, bold white sticker outline, centered, high quality, crisp details.`;
+    const iconPart = state.icon.trim() ? `, featuring a drawn visual illustration of ${state.icon.trim()} (draw it as a picture, NOT as text)` : '';
+    const noExtra = state.message.trim() ? ' Do not add any extra text beyond what was provided.' : ' No text, no letters, no words on the sticker.';
+    return `${vibe.promptStyle}${msgPart}${iconPart}. Clean pure white background, bold white sticker outline, centered, high quality, crisp details.${noExtra}`;
   }
 
   /* ── AI Image Generation (core logic unchanged) ── */
