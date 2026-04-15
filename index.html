@@ -937,13 +937,13 @@
         <div class="sticker-check">✓</div>
       </button>
       <button type="button" class="sticker-card" id="stickerCardB" onclick="selectStickerCard('b')">
-        <span class="vibe-new-badge" id="seedreamNewBadge">NEW</span>
+        <span class="vibe-new-badge" id="modelBNewBadge">NEW</span>
         <div class="sticker-card-spinner" id="stickerSpinnerB">
           <div class="mini-emoji">🎨</div>
           <div class="loading-dots"><span></span><span></span><span></span></div>
         </div>
-        <img class="sticker-img" id="stickerImgB" alt="Sticker — Seedream" style="display:none">
-        <div class="sticker-model-label">Seedream</div>
+        <img class="sticker-img" id="stickerImgB" alt="Sticker — Riverflow V2 Pro" style="display:none">
+        <div class="sticker-model-label">Riverflow V2 Pro</div>
         <div class="sticker-check">✓</div>
       </button>
       <button type="button" class="sticker-card" id="stickerCardC" onclick="selectStickerCard('c')" style="display:none">
@@ -1128,12 +1128,12 @@
 
   /* ── Models ── */
   const MODEL_A = 'google/gemini-3.1-flash-image-preview';
-  const MODEL_B = 'bytedance-seed/seedream-4.5';
+  const MODEL_B = 'sourceful/riverflow-v2-pro';
   const MODEL_C = 'black-forest-labs/flux.2-max'; // Used only for Lamia's Style (3-model mode)
 
   const MODEL_LABELS = {
     a: 'Nano Banana 2',
-    b: 'Seedream',
+    b: 'Riverflow V2 Pro',
     c: 'FLUX.2 Max',
   };
 
@@ -1251,7 +1251,7 @@
     document.getElementById('msgInput').placeholder     = c.placeholder;
     document.getElementById('uploadLabel').textContent    = c.uploadLabel;
     document.getElementById('uploadHint').textContent     = c.uploadHint;
-    document.getElementById('seedreamNewBadge').textContent = lang === 'AR' ? 'جديد' : 'NEW';
+    document.getElementById('modelBNewBadge').textContent = lang === 'AR' ? 'جديد' : 'NEW';
     document.getElementById('fluxNewBadge').textContent     = lang === 'AR' ? 'جديد' : 'NEW';
     document.getElementById('bgNewBadge').textContent       = lang === 'AR' ? 'جديد' : 'NEW';
     document.getElementById('bgPickerLabel').textContent    = c.bgLabel;
