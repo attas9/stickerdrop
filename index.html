@@ -1207,7 +1207,7 @@
       const lang = state.lang || 'EN';
 
       let badges = '';
-      if (v.id === 'random') {
+      if (v.id === 'random' || v.id === 'filmatic') {
         badges += `<span class="vibe-new-badge">${lang === 'AR' ? 'جديد' : 'NEW'}</span>`;
       }
       if (v.id === 'lamiaPremium') {
