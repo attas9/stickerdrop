@@ -1600,11 +1600,31 @@
       else if (key === 'b') state.stickerB = finalUrl;
       else if (key === 'c') state.stickerC = finalUrl;
       await loadIntoCardImg(key, finalUrl);
+      // Fire-and-forget: save to Vercel Blob gallery for later browsing
+      autoSaveToGallery(finalUrl, model).catch(() => {});
     } catch (err) {
       console.warn(`Model ${model} failed:`, err);
       document.getElementById('stickerCard' + K).classList.add('failed');
       throw err;
     }
+  }
+
+  async function autoSaveToGallery(dataUrl, model) {
+    if (!dataUrl || !dataUrl.startsWith('data:')) return;
+    const parts = dataUrl.split(',');
+    const mime = parts[0].match(/:(.*?);/)[1];
+    const base64 = parts[1];
+    await fetch('/api/save-sticker', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        base64,
+        mimeType: mime,
+        mode: 'gallery',
+        vibe: state.vibe || 'unknown',
+        model: (model || '').split('/').pop(),
+      })
+    });
   }
 
   /* ── Replace white pixels with transparent, black, or keep as-is ── */
