@@ -1029,7 +1029,7 @@
       promptStyle: 'Pinterest-perfect minimalist whimsical sticker, monoline thin consistent line illustration, single pop of soft blush pink or sage green accent color, abstract organic shapes, simple line-art hearts, paper-cutout depth effect, Scandi-boho color palette, airy sophisticated composition, vector line art style, "less is more" romantic elegance, clean pure white background, thin clean white sticker outline.',
       fontAR: 'Amiri',
       textStyleClass: 'style-retro',
-      singleModel: true, // only Nano Banana 2
+      premiumPair: true, // Nano Banana 2 + GPT-5.4 Image 2
     },
     {
       id: 'lamia',
@@ -1130,12 +1130,14 @@
   const MODEL_A = 'google/gemini-3.1-flash-image-preview';
   const MODEL_B = 'sourceful/riverflow-v2-pro';
   const MODEL_C = 'black-forest-labs/flux.2-max'; // Used only for Lamia's Style (3-model mode)
+  const MODEL_PREMIUM = 'openai/gpt-5.4-image-2'; // Lamia Premium partner for MODEL_A
 
   const MODEL_LABELS = {
     a: 'Nano Banana 2',
     b: 'Riverflow V2 Pro',
     c: 'FLUX.2 Max',
   };
+  const MODEL_LABEL_PREMIUM = 'GPT-5.4 Image 2';
 
   /* ── State ── */
   const state = {
@@ -1518,9 +1520,15 @@
     // Determine card layout based on vibe
     const vibeObj = VIBES.find(v => v.id === state.vibe);
     const isLamia = state.vibe === 'lamia';
-    const isSingle = vibeObj && vibeObj.singleModel;
+    const isPremiumPair = vibeObj && vibeObj.premiumPair;
 
-    document.getElementById('stickerCardB').style.display = isSingle ? 'none' : 'flex';
+    // Dynamically relabel card B when in Premium Pair mode
+    const cardBLabelEl = document.querySelector('#stickerCardB .sticker-model-label');
+    if (cardBLabelEl) {
+      cardBLabelEl.textContent = isPremiumPair ? MODEL_LABEL_PREMIUM : MODEL_LABELS.b;
+    }
+
+    document.getElementById('stickerCardB').style.display = 'flex';
     document.getElementById('stickerCardC').style.display = isLamia ? 'flex' : 'none';
 
     // Show the row immediately and hide the big loading wrap
@@ -1540,11 +1548,12 @@
         loadModelIntoCard(promptB, MODEL_B, 'b'),
         loadModelIntoCard(promptC, MODEL_C, 'c'),
       ];
-    } else if (isSingle) {
-      // Single model (e.g. Lamia Premium) — only Nano Banana 2
+    } else if (isPremiumPair) {
+      // Premium Pair (Lamia Premium) — Nano Banana 2 + GPT-5.4 Image 2
       const prompt = await buildPromptWithGemini();
       tasks = [
         loadModelIntoCard(prompt, MODEL_A, 'a'),
+        loadModelIntoCard(prompt, MODEL_PREMIUM, 'b'),
       ];
     } else {
       const prompt = await buildPromptWithGemini();
