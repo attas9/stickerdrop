@@ -946,25 +946,15 @@
         <div class="sticker-model-label">Nano Banana 2</div>
         <div class="sticker-check">✓</div>
       </button>
-      <button type="button" class="sticker-card" id="stickerCardB" onclick="selectStickerCard('b')">
+      <button type="button" class="sticker-card" id="stickerCardB" onclick="selectStickerCard('b')" style="display:none">
         <span class="vibe-new-badge" id="modelBNewBadge">NEW</span>
         <div class="sticker-card-spinner" id="stickerSpinnerB">
           <div class="mini-emoji">🎨</div>
           <div class="loading-dots"><span></span><span></span><span></span></div>
           <div class="slow-hint" id="slowHintB">This one takes a moment ⏳</div>
         </div>
-        <img class="sticker-img" id="stickerImgB" alt="Sticker — Riverflow V2 Pro" style="display:none">
-        <div class="sticker-model-label">Riverflow V2 Pro</div>
-        <div class="sticker-check">✓</div>
-      </button>
-      <button type="button" class="sticker-card" id="stickerCardC" onclick="selectStickerCard('c')" style="display:none">
-        <span class="vibe-new-badge" id="fluxNewBadge">NEW</span>
-        <div class="sticker-card-spinner" id="stickerSpinnerC">
-          <div class="mini-emoji">🎨</div>
-          <div class="loading-dots"><span></span><span></span><span></span></div>
-        </div>
-        <img class="sticker-img" id="stickerImgC" alt="Sticker — FLUX.2 Max" style="display:none">
-        <div class="sticker-model-label">FLUX.2 Max</div>
+        <img class="sticker-img" id="stickerImgB" alt="Sticker — GPT-5 Image Mini" style="display:none">
+        <div class="sticker-model-label">GPT-5 Image Mini</div>
         <div class="sticker-check">✓</div>
       </button>
     </div>
@@ -1040,7 +1030,7 @@
       promptStyle: 'Pinterest-perfect minimalist whimsical sticker, monoline thin consistent line illustration, single pop of soft blush pink or sage green accent color, abstract organic shapes, simple line-art hearts, paper-cutout depth effect, Scandi-boho color palette, airy sophisticated composition, vector line art style, "less is more" romantic elegance, clean pure white background, thin clean white sticker outline.',
       fontAR: 'Amiri',
       textStyleClass: 'style-retro',
-      premiumPair: true, // Nano Banana 2 + GPT-5.4 Image 2
+      premiumPair: true, // Nano Banana 2 + GPT-5 Image Mini
     },
     {
       id: 'lamia',
@@ -1139,16 +1129,12 @@
 
   /* ── Models ── */
   const MODEL_A = 'google/gemini-3.1-flash-image-preview';
-  const MODEL_B = 'sourceful/riverflow-v2-pro';
-  const MODEL_C = 'black-forest-labs/flux.2-max'; // Used only for Lamia's Style (3-model mode)
-  const MODEL_PREMIUM = 'openai/gpt-5.4-image-2'; // Lamia Premium partner for MODEL_A
+  const MODEL_PREMIUM = 'openai/gpt-5-image-mini'; // Lamia Premium partner for MODEL_A
 
   const MODEL_LABELS = {
     a: 'Nano Banana 2',
-    b: 'Riverflow V2 Pro',
-    c: 'FLUX.2 Max',
   };
-  const MODEL_LABEL_PREMIUM = 'GPT-5.4 Image 2';
+  const MODEL_LABEL_PREMIUM = 'GPT-5 Image Mini';
 
   /* ── State ── */
   const state = {
@@ -1162,7 +1148,6 @@
     bgStyle:    'white', // 'white' | 'transparent' | 'black'
     stickerA:   null,  // data URL for model A sticker
     stickerB:   null,  // data URL for model B sticker
-    stickerC:   null,  // data URL for model C sticker (Lamia only)
     selectedSticker: null, // 'a' | 'b' | 'c'
   };
 
@@ -1265,7 +1250,6 @@
     document.getElementById('uploadLabel').textContent    = c.uploadLabel;
     document.getElementById('uploadHint').textContent     = c.uploadHint;
     document.getElementById('modelBNewBadge').textContent = lang === 'AR' ? 'جديد' : 'NEW';
-    document.getElementById('fluxNewBadge').textContent     = lang === 'AR' ? 'جديد' : 'NEW';
     document.getElementById('bgNewBadge').textContent       = lang === 'AR' ? 'جديد' : 'NEW';
     document.getElementById('bgPickerLabel').textContent    = c.bgLabel;
     document.getElementById('bgChipWhite').textContent      = c.bgWhite;
@@ -1524,7 +1508,6 @@
     // Reset state
     state.stickerA = null;
     state.stickerB = null;
-    state.stickerC = null;
     state.selectedSticker = null;
     resetStickerCards();
 
@@ -1532,61 +1515,43 @@
     const vibeObj = VIBES.find(v => v.id === state.vibe);
     const isLamia = state.vibe === 'lamia';
     const isPremiumPair = vibeObj && vibeObj.premiumPair;
-
-    // When a reference image is uploaded (Similar or Enhance mode), only
-    // Nano Banana 2 reliably handles image-to-image — other models either
-    // fail or ignore the reference. Show a single card to avoid confusing
-    // failed states and wasted credit.
     const isRef = !!state.refImage;
 
-    // Dynamically relabel card B when in Premium Pair mode
+    // Card B only appears for Lamia Premium (no ref upload).
+    const showCardB = isPremiumPair && !isRef;
+    document.getElementById('stickerCardB').style.display = showCardB ? 'flex' : 'none';
+
+    // Card B label (only meaningful when shown)
     const cardBLabelEl = document.querySelector('#stickerCardB .sticker-model-label');
-    if (cardBLabelEl) {
-      cardBLabelEl.textContent = isPremiumPair ? MODEL_LABEL_PREMIUM : MODEL_LABELS.b;
-    }
+    if (cardBLabelEl) cardBLabelEl.textContent = MODEL_LABEL_PREMIUM;
 
-    // Show "takes a moment" hint on card B only when premium pair is active
+    // GPT-5 Image Mini is fast, so no "takes a moment" hint anymore
     const slowHint = document.getElementById('slowHintB');
-    if (slowHint) slowHint.classList.toggle('show', isPremiumPair && !isRef);
-
-    document.getElementById('stickerCardB').style.display = isRef ? 'none' : 'flex';
-    document.getElementById('stickerCardC').style.display = (isLamia && !isRef) ? 'flex' : 'none';
+    if (slowHint) slowHint.classList.remove('show');
 
     // Show the row immediately and hide the big loading wrap
     setUIState('result');
 
     let tasks;
-    if (isRef) {
-      // Reference image uploaded — only Nano Banana 2 handles image-to-image
-      const prompt = await buildPromptWithGemini();
-      tasks = [
-        loadModelIntoCard(prompt, MODEL_A, 'a'),
-      ];
-    } else if (isLamia) {
-      // Shuffle the 3 substyles so each model gets a different one
-      const shuffled = [...LAMIA_STYLES].sort(() => Math.random() - 0.5);
-      const [promptA, promptB, promptC] = await Promise.all([
-        buildPromptWithGemini(shuffled[0]),
-        buildPromptWithGemini(shuffled[1]),
-        buildPromptWithGemini(shuffled[2]),
-      ]);
-      tasks = [
-        loadModelIntoCard(promptA, MODEL_A, 'a'),
-        loadModelIntoCard(promptB, MODEL_B, 'b'),
-        loadModelIntoCard(promptC, MODEL_C, 'c'),
-      ];
-    } else if (isPremiumPair) {
-      // Premium Pair (Lamia Premium) — Nano Banana 2 + GPT-5.4 Image 2
+    if (showCardB) {
+      // Lamia Premium — Nano Banana 2 + GPT-5 Image Mini
       const prompt = await buildPromptWithGemini();
       tasks = [
         loadModelIntoCard(prompt, MODEL_A, 'a'),
         loadModelIntoCard(prompt, MODEL_PREMIUM, 'b'),
       ];
+    } else if (isLamia) {
+      // Lamia's Style — single Nano Banana 2 with a random substyle pick
+      const pick = LAMIA_STYLES[Math.floor(Math.random() * LAMIA_STYLES.length)];
+      const prompt = await buildPromptWithGemini(pick);
+      tasks = [
+        loadModelIntoCard(prompt, MODEL_A, 'a'),
+      ];
     } else {
+      // Regular vibes and reference uploads — single Nano Banana 2
       const prompt = await buildPromptWithGemini();
       tasks = [
         loadModelIntoCard(prompt, MODEL_A, 'a'),
-        loadModelIntoCard(prompt, MODEL_B, 'b'),
       ];
     }
 
@@ -1600,7 +1565,6 @@
     // Auto-select first successful card
     if (state.stickerA) selectStickerCard('a');
     else if (state.stickerB) selectStickerCard('b');
-    else if (state.stickerC) selectStickerCard('c');
   }
 
   async function loadModelIntoCard(prompt, model, key) {
@@ -1610,7 +1574,6 @@
       const finalUrl = await processStickerBg(rawUrl, state.bgStyle);
       if (key === 'a')      state.stickerA = finalUrl;
       else if (key === 'b') state.stickerB = finalUrl;
-      else if (key === 'c') state.stickerC = finalUrl;
       await loadIntoCardImg(key, finalUrl);
       // Fire-and-forget: save to Vercel Blob gallery for later browsing
       autoSaveToGallery(finalUrl, model).catch(() => {});
@@ -1700,7 +1663,7 @@
   }
 
   function resetStickerCards() {
-    ['a', 'b', 'c'].forEach(key => {
+    ['a', 'b'].forEach(key => {
       const K = key.toUpperCase();
       const card    = document.getElementById('stickerCard' + K);
       const img     = document.getElementById('stickerImg' + K);
@@ -1718,18 +1681,15 @@
     if (!card || card.classList.contains('failed')) return;
     if (key === 'a' && !state.stickerA) return;
     if (key === 'b' && !state.stickerB) return;
-    if (key === 'c' && !state.stickerC) return;
 
     state.selectedSticker = key;
     document.getElementById('stickerCardA').classList.toggle('selected', key === 'a');
     document.getElementById('stickerCardB').classList.toggle('selected', key === 'b');
-    document.getElementById('stickerCardC').classList.toggle('selected', key === 'c');
   }
 
   function getSelectedStickerUrl() {
     if (state.selectedSticker === 'a') return state.stickerA;
     if (state.selectedSticker === 'b') return state.stickerB;
-    if (state.selectedSticker === 'c') return state.stickerC;
     return null;
   }
 
@@ -1920,13 +1880,11 @@
     state.message = '';
     state.stickerA = null;
     state.stickerB = null;
-    state.stickerC = null;
     state.selectedSticker = null;
 
     document.querySelectorAll('.vibe-card').forEach(c => c.classList.remove('active'));
     document.getElementById('step2Block').classList.remove('complete');
-    document.getElementById('stickerCardB').style.display = 'flex';
-    document.getElementById('stickerCardC').style.display = 'none';
+    document.getElementById('stickerCardB').style.display = 'none';
     document.getElementById('step3Reveal').classList.remove('visible');
     document.getElementById('step4Reveal').classList.remove('visible');
     document.getElementById('step5Reveal').classList.remove('visible');
