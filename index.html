@@ -1533,6 +1533,12 @@
     const isLamia = state.vibe === 'lamia';
     const isPremiumPair = vibeObj && vibeObj.premiumPair;
 
+    // When a reference image is uploaded (Similar or Enhance mode), only
+    // Nano Banana 2 reliably handles image-to-image — other models either
+    // fail or ignore the reference. Show a single card to avoid confusing
+    // failed states and wasted credit.
+    const isRef = !!state.refImage;
+
     // Dynamically relabel card B when in Premium Pair mode
     const cardBLabelEl = document.querySelector('#stickerCardB .sticker-model-label');
     if (cardBLabelEl) {
@@ -1541,16 +1547,22 @@
 
     // Show "takes a moment" hint on card B only when premium pair is active
     const slowHint = document.getElementById('slowHintB');
-    if (slowHint) slowHint.classList.toggle('show', isPremiumPair);
+    if (slowHint) slowHint.classList.toggle('show', isPremiumPair && !isRef);
 
-    document.getElementById('stickerCardB').style.display = 'flex';
-    document.getElementById('stickerCardC').style.display = isLamia ? 'flex' : 'none';
+    document.getElementById('stickerCardB').style.display = isRef ? 'none' : 'flex';
+    document.getElementById('stickerCardC').style.display = (isLamia && !isRef) ? 'flex' : 'none';
 
     // Show the row immediately and hide the big loading wrap
     setUIState('result');
 
     let tasks;
-    if (isLamia) {
+    if (isRef) {
+      // Reference image uploaded — only Nano Banana 2 handles image-to-image
+      const prompt = await buildPromptWithGemini();
+      tasks = [
+        loadModelIntoCard(prompt, MODEL_A, 'a'),
+      ];
+    } else if (isLamia) {
       // Shuffle the 3 substyles so each model gets a different one
       const shuffled = [...LAMIA_STYLES].sort(() => Math.random() - 0.5);
       const [promptA, promptB, promptC] = await Promise.all([
